@@ -62,7 +62,7 @@
         <button class="btn-secondary" id="closeAddBtn" type="button" style="margin-bottom: 10px;">⬅ العودة للقائمة</button>
         <div class="section-title">إضافة عامل جديد</div>
         <div class="input-group">
-            <label>اسم العامل</label>
+            <label>اسم العامل (باللغة العربية)</label>
             <input type="text" id="newWorkerName" placeholder="أدخل اسم العامل">
         </div>
         <div class="input-group">
@@ -195,7 +195,6 @@
         }
     }
 
-    // جلب البيانات أول مرة فقط لتجنب إعادة رسم الواجهة ومقاطعة إدخال المستخدم
     let isInitialLoad = true;
     dbRef.on('value', (snapshot) => {
         const data = snapshot.val();
@@ -206,11 +205,11 @@
         }
         if (isInitialLoad) {
             isInitialLoad = false;
-            updateStatus('✅ متصل بالسحابة (محدث)', 'success');
+            updateStatus('✅ متصل بالسحابة (جاهز للاستخدام)', 'success');
         }
     }, (error) => {
         console.error(error);
-        updateStatus('❌ خطأ اتصال بالسحابة', 'error');
+        updateStatus('❌ خطأ في الاتصال بالسحابة', 'error');
     });
 
     function saveCloudData(callback) {
@@ -221,11 +220,10 @@
         }).catch(err => {
             console.error(err);
             updateStatus('❌ فشل الحفظ بالسحابة', 'error');
-            alert('فشل الحفظ: تأكد من قواعد الأمان في فايربيس.');
+            alert('فشل الحفظ: تحقق من الاتصال بالإنترنت.');
         });
     }
 
-    // التنقل بين الواجهات
     document.getElementById('openAddBtn').addEventListener('click', function() {
         document.getElementById('newWorkerName').value = '';
         document.getElementById('newWorkerSalary').value = '';
@@ -238,13 +236,12 @@
         document.getElementById('mainHomeView').classList.remove('hidden');
     });
 
-    // زر حفظ العامل (تم إصلاحه ليعمل بشكل نظامي)
     document.getElementById('saveWorkerBtn').addEventListener('click', function() {
         const name = document.getElementById('newWorkerName').value.trim();
         const salary = parseFloat(document.getElementById('newWorkerSalary').value) || 0;
 
         if (!name || salary <= 0) {
-            alert('الرجاء إدخال اسم العامل والراتب الصحيح');
+            alert('الرجاء إدخال اسم العامل بشكل صحيح وراتب أكبر من الصفر');
             return;
         }
 
@@ -413,4 +410,5 @@
             recordDiv.className = 'day-record-box';
             recordDiv.innerHTML = `
                 <div>
-         
+                    <div class="day-record-header">${rec.date} - ${statusText}</div>
+                    <div style="color:#
