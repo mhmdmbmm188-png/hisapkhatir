@@ -10,81 +10,72 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', Tahoma, Arial, sans-serif; }
 
         body {
-            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            background: #0f172a;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 12px;
             color: #1e293b;
         }
 
         .app {
             background: #ffffff;
-            padding: 20px;
-            border-radius: 24px;
+            padding: 15px;
+            border-radius: 20px;
             width: 100%;
             max-width: 480px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0 auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
         .app-header {
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         h2 {
             color: #312e81;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
         }
 
         .developer-tag {
-            font-size: 12px;
+            font-size: 11px;
             color: #6366f1;
             font-weight: 700;
             margin-top: 2px;
         }
 
         .section-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
             color: #1e293b;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-bottom: 8px;
         }
 
         .btn-primary {
             background: #4f46e5;
             color: white;
             border: none;
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 13px;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
             width: 100%;
-            margin-bottom: 12px;
-            transition: 0.2s;
+            margin-bottom: 10px;
         }
-
-        .btn-primary:hover { background: #4338ca; }
 
         .btn-secondary {
             background: #64748b;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 10px;
             border-radius: 10px;
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
+            width: 100%;
         }
 
         .btn-danger {
@@ -99,71 +90,57 @@
 
         .worker-card {
             background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            padding: 12px 14px;
-            border-radius: 14px;
+            border: 1.5px solid #e2e8f0;
+            padding: 10px 12px;
+            border-radius: 12px;
             margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
-            transition: 0.2s;
         }
-
-        .worker-card:hover {
-            border-color: #6366f1;
-            background: #fff;
-        }
-
-        .worker-info span { display: block; }
 
         .worker-name {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
             color: #0f172a;
         }
 
         .worker-salary {
-            font-size: 12px;
+            font-size: 11px;
             color: #64748b;
             font-weight: 600;
             margin-top: 2px;
         }
 
-        .input-group { margin-bottom: 10px; }
+        .input-group { margin-bottom: 8px; }
 
         label {
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             color: #334155;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
         }
 
         input, select {
             width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 13px;
+            padding: 9px 10px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 12px;
             outline: none;
             background: #f8fafc;
             color: #0f172a;
             font-weight: 600;
         }
 
-        input:focus, select:focus {
-            border-color: #6366f1;
-            background: #fff;
-        }
-
         .day-record-box {
             background: #f1f5f9;
-            border: 1.5px solid #cbd5e1;
-            padding: 10px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            font-size: 12px;
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            font-size: 11px;
         }
 
         .day-record-header {
@@ -171,106 +148,97 @@
             color: #312e81;
             display: flex;
             justify-content: space-between;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .summary-box {
-            background: linear-gradient(135deg, #4f46e5, #4338ca);
+            background: #4f46e5;
             color: white;
-            padding: 14px;
-            border-radius: 14px;
-            margin-top: 14px;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 10px;
         }
 
         .summary-box div {
-            margin-bottom: 4px;
-            font-size: 13px;
+            margin-bottom: 3px;
+            font-size: 12px;
             font-weight: 700;
         }
 
         .summary-total {
-            font-size: 16px !important;
+            font-size: 14px !important;
             font-weight: 800 !important;
             border-top: 1px solid rgba(255,255,255,0.2);
-            padding-top: 6px;
-            margin-top: 6px;
+            padding-top: 5px;
+            margin-top: 5px;
         }
 
         .period-box {
             background: #eef2ff;
             border: 1px solid #c7d2fe;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            color: #1e293b;
         }
 
         .period-title {
             font-weight: 800;
             color: #3730a3;
-            font-size: 13px;
-            margin-bottom: 4px;
-            border-bottom: 1px dashed #c7d2fe;
-            padding-bottom: 2px;
+            font-size: 12px;
+            margin-bottom: 3px;
         }
 
-        /* نافذة التقويم المخصص */
-        .custom-calendar-modal {
+        /* تصميم النوافذ المنبثقة المتوافقة تماماً مع التطبيق */
+        .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex; align-items: center; justify-content: center;
-            padding: 20px;
-            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            z-index: 9999;
         }
-        .calendar-card {
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-card {
             background: white;
-            padding: 20px;
-            border-radius: 20px;
+            padding: 16px;
+            border-radius: 16px;
             width: 100%;
-            max-width: 360px;
-            text-align: center;
+            max-width: 340px;
         }
+
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            margin-top: 10px;
+            gap: 4px;
+            margin-top: 8px;
         }
         .cal-day-name {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
             color: #64748b;
-            padding-bottom: 6px;
+            text-align: center;
+            padding-bottom: 4px;
         }
         .cal-day {
-            padding: 10px 0;
+            padding: 8px 0;
             background: #f1f5f9;
-            border-radius: 8px;
-            font-size: 13px;
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: 700;
             cursor: pointer;
+            text-align: center;
             color: #1e293b;
         }
-        /* الأيام التي لم تُعدّل تبقى بيضاء أو بلون افتراضي خفيف */
-        .cal-day.recorded-present {
-            background: #22c55e !important; /* أخضر للدوام */
-            color: white !important;
-        }
-        .cal-day.recorded-absent {
-            background: #dc2626 !important; /* أحمر للغياب */
-            color: white !important;
-        }
-        .cal-day.recorded-weekend {
-            background: #64748b !important; /* رمادي للعطلة */
-            color: white !important;
-        }
-        .cal-day.selected {
-            border: 2px solid #1e293b;
-        }
-        .cal-day.empty {
-            background: transparent;
-            cursor: default;
-        }
+        .cal-day.recorded-present { background: #22c55e !important; color: white !important; }
+        .cal-day.recorded-absent { background: #dc2626 !important; color: white !important; }
+        .cal-day.recorded-weekend { background: #64748b !important; color: white !important; }
+        .cal-day.selected { border: 2px solid #1e293b; }
+        .cal-day.empty { background: transparent; cursor: default; }
 
         .hidden { display: none !important; }
     </style>
@@ -286,27 +254,25 @@
 
     <!-- واجهة قائمة العمال الرئيسية -->
     <div id="mainHomeView">
-        <div class="section-title">
-            <span>قائمة العمال</span>
-        </div>
+        <div class="section-title">قائمة العمال</div>
         <button class="btn-primary" onclick="openAddWorkerModal()">➕ إضافة عامل جديد</button>
-        <div id="workersListContainer" style="max-height: 380px; overflow-y: auto; margin-top: 8px;"></div>
+        <div id="workersListContainer" style="max-height: 320px; overflow-y: auto; margin-top: 6px;"></div>
     </div>
 
     <!-- واجهة ملف العامل الشخصي واليوميات -->
     <div id="workerProfileView" class="hidden">
-        <button class="btn-secondary" onclick="backToHome()">⬅ العودة للقائمة</button>
+        <button class="btn-secondary" onclick="backToHome()" style="margin-bottom: 8px;">⬅ العودة للقائمة</button>
         
-        <div style="margin-top: 10px; background: #e0e7ff; padding: 10px; border-radius: 12px; text-align: center;">
-            <div id="profileWorkerName" style="font-size: 15px; font-weight: 800; color: #312e81;"></div>
-            <div id="profileWorkerSalary" style="font-size: 12px; color: #4338ca; font-weight: 700;"></div>
+        <div style="background: #e0e7ff; padding: 8px; border-radius: 10px; text-align: center; margin-bottom: 8px;">
+            <div id="profileWorkerName" style="font-size: 14px; font-weight: 800; color: #312e81;"></div>
+            <div id="profileWorkerSalary" style="font-size: 11px; color: #4338ca; font-weight: 700;"></div>
         </div>
 
-        <div style="margin-top: 10px; border-top: 2px solid #f1f5f9; padding-top: 8px;">
-            <div class="section-title" style="font-size:13px;">تسجيل حركة يومية</div>
+        <div style="border-top: 1.5px solid #f1f5f9; padding-top: 6px;">
+            <div class="section-title" style="font-size:12px;">تسجيل حركة يومية</div>
             
             <div class="input-group">
-                <label>اختر التاريخ من التقويم (الأخضر: داوم، الأحمر: غائب، الأبيض: غير مسجل)</label>
+                <label>التاريخ (اضغط لاختيار اليوم)</label>
                 <input type="text" id="recordDateDisplay" readonly onclick="openCalendarModal()" style="cursor: pointer; background: #fff; text-align: center; font-weight: 800; color: #4f46e5;">
                 <input type="hidden" id="recordDate" onchange="checkAutoWeekend()">
             </div>
@@ -342,9 +308,9 @@
             <button class="btn-primary" onclick="saveDayRecord()">💾 حفظ حركة هذا اليوم</button>
         </div>
 
-        <div style="margin-top: 5px;">
-            <div class="section-title" style="font-size:13px;">سجل الأيام المسجلة</div>
-            <div id="workerDaysList" style="max-height: 150px; overflow-y: auto;"></div>
+        <div style="margin-top: 4px;">
+            <div class="section-title" style="font-size:12px;">سجل الأيام المسجلة</div>
+            <div id="workerDaysList" style="max-height: 130px; overflow-y: auto;"></div>
         </div>
 
         <div class="summary-box" id="workerFinancialSummary"></div>
@@ -352,8 +318,8 @@
 </div>
 
 <!-- نافذة إضافة عامل جديد -->
-<div id="addWorkerModal" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; padding: 20px; z-index: 1000;">
-    <div style="background:white; padding:20px; border-radius:20px; width:100%; max-width:380px;">
+<div id="addWorkerModal" class="modal-overlay">
+    <div class="modal-card">
         <div class="section-title">إضافة عامل جديد</div>
         <div class="input-group">
             <label>اسم العامل</label>
@@ -364,17 +330,17 @@
             <input type="number" id="newWorkerSalary" placeholder="أدخل الراتب">
         </div>
         <button class="btn-primary" onclick="addNewWorker()">حفظ العامل</button>
-        <button class="btn-secondary" onclick="closeAddWorkerModal()" style="width:100%; margin-top:4px;">إلغاء</button>
+        <button class="btn-secondary" onclick="closeAddWorkerModal()">إلغاء</button>
     </div>
 </div>
 
 <!-- نافذة التقويم المخصص الملون -->
-<div id="calendarModal" class="custom-calendar-modal hidden">
-    <div class="calendar-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <button class="btn-secondary" onclick="changeCalendarMonth(-1)">▶</button>
-            <span id="calMonthYearTitle" style="font-weight: 800; color: #312e81; font-size: 15px;"></span>
-            <button class="btn-secondary" onclick="changeCalendarMonth(1)">◀</button>
+<div id="calendarModal" class="modal-overlay">
+    <div class="modal-card" style="text-align: center;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <button class="btn-secondary" style="width: auto; padding: 6px 12px;" onclick="changeCalendarMonth(-1)">▶</button>
+            <span id="calMonthYearTitle" style="font-weight: 800; color: #312e81; font-size: 14px;"></span>
+            <button class="btn-secondary" style="width: auto; padding: 6px 12px;" onclick="changeCalendarMonth(1)">◀</button>
         </div>
         <div class="calendar-grid">
             <div class="cal-day-name">أحد</div>
@@ -385,16 +351,15 @@
             <div class="cal-day-name">جمعة</div>
             <div class="cal-day-name">سبت</div>
         </div>
-        <div id="calDaysContainer" class="calendar-grid" style="margin-top: 6px;"></div>
+        <div id="calDaysContainer" class="calendar-grid" style="margin-top: 4px;"></div>
         
-        <!-- مفتاح الألوان للتوضيح -->
-        <div style="display: flex; justify-content: space-around; margin-top: 12px; font-size: 11px; font-weight: 700; color: #64748b;">
-            <span><span style="display:inline-block; width:10px; height:10px; background:#22c55e; border-radius:50%;"></span> داوم</span>
-            <span><span style="display:inline-block; width:10px; height:10px; background:#dc2626; border-radius:50%;"></span> غائب</span>
-            <span><span style="display:inline-block; width:10px; height:10px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:50%;"></span> لم يُعدّل</span>
+        <div style="display: flex; justify-content: space-around; margin-top: 10px; font-size: 10px; font-weight: 700; color: #64748b;">
+            <span><span style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%;"></span> داوم</span>
+            <span><span style="display:inline-block; width:8px; height:8px; background:#dc2626; border-radius:50%;"></span> غائب</span>
+            <span><span style="display:inline-block; width:8px; height:8px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:50%;"></span> غير مسجل</span>
         </div>
 
-        <button class="btn-secondary" onclick="closeCalendarModal()" style="width: 100%; margin-top: 10px;">إغلاق</button>
+        <button class="btn-secondary" onclick="closeCalendarModal()" style="margin-top: 10px;">إغلاق</button>
     </div>
 </div>
 
@@ -441,7 +406,7 @@ function renderWorkersList() {
     container.innerHTML = '';
     
     if (workers.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:13px; padding:20px;">لا يوجد عمال مضافين حالياً.</div>';
+        container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; padding:15px;">لا يوجد عمال مضافين حالياً.</div>';
         return;
     }
 
@@ -449,7 +414,7 @@ function renderWorkersList() {
         const card = document.createElement('div');
         card.className = 'worker-card';
         card.innerHTML = `
-            <div class="worker-info" onclick="openWorkerProfile(${index})">
+            <div style="flex-grow: 1; cursor: pointer;" onclick="openWorkerProfile(${index})">
                 <span class="worker-name">👤 ${worker.name}</span>
                 <span class="worker-salary">الراتب: ${worker.salary} ليرة (على 30 يوم)</span>
             </div>
@@ -464,11 +429,11 @@ function renderWorkersList() {
 function openAddWorkerModal() {
     document.getElementById('newWorkerName').value = '';
     document.getElementById('newWorkerSalary').value = '';
-    document.getElementById('addWorkerModal').classList.remove('hidden');
+    document.getElementById('addWorkerModal').classList.add('active');
 }
 
 function closeAddWorkerModal() {
-    document.getElementById('addWorkerModal').classList.add('hidden');
+    document.getElementById('addWorkerModal').classList.remove('active');
 }
 
 function addNewWorker() {
@@ -529,12 +494,12 @@ function toggleRecordFields() {
 }
 
 function openCalendarModal() {
-    document.getElementById('calendarModal').classList.remove('hidden');
+    document.getElementById('calendarModal').classList.add('active');
     renderCustomCalendar();
 }
 
 function closeCalendarModal() {
-    document.getElementById('calendarModal').classList.add('hidden');
+    document.getElementById('calendarModal').classList.remove('active');
 }
 
 function changeCalendarMonth(direction) {
@@ -556,11 +521,9 @@ function renderCustomCalendar() {
     container.innerHTML = '';
 
     const worker = workers[activeWorkerId];
-    
-    // إنشاء خريطة لمعرفة حالة كل تاريخ مسجل
     const recordsMap = {};
     worker.records.forEach(r => {
-        recordsMap[r.date] = r.status; // 'present', 'absent', 'weekend'
+        recordsMap[r.date] = r.status;
     });
 
     const selectedDate = document.getElementById('recordDate').value;
@@ -580,8 +543,44 @@ function renderCustomCalendar() {
         const dFormatted = String(d).padStart(2, '0');
         const currentDateStr = `${year}-${mFormatted}-${dFormatted}`;
 
-        // تلوين الأيام بناءً على حالة التعديل والغياب
         if (recordsMap[currentDateStr] === 'present') {
-            dayDiv.classList.add('recorded-present'); // أخضر
+            dayDiv.classList.add('recorded-present');
         } else if (recordsMap[currentDateStr] === 'absent') {
-            dayDiv.classList.add('
+            dayDiv.classList.add('recorded-absent');
+        } else if (recordsMap[currentDateStr] === 'weekend') {
+            dayDiv.classList.add('recorded-weekend');
+        }
+
+        if (currentDateStr === selectedDate) {
+            dayDiv.classList.add('selected');
+        }
+
+        dayDiv.onclick = function() {
+            document.getElementById('recordDate').value = currentDateStr;
+            updateDateDisplay(currentDateStr);
+            
+            if (recordsMap[currentDateStr]) {
+                document.getElementById('recordStatus').value = recordsMap[currentDateStr];
+            } else {
+                checkAutoWeekend();
+            }
+            toggleRecordFields();
+            closeCalendarModal();
+        };
+
+        container.appendChild(dayDiv);
+    }
+}
+
+function saveDayRecord() {
+    const date = document.getElementById('recordDate').value;
+    const status = document.getElementById('recordStatus').value;
+    
+    if (!date) {
+        alert('الرجاء اختيار التاريخ');
+        return;
+    }
+
+    const overtime = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertime').value) || 0);
+    const overtimeDouble = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertimeDouble').value) || 0);
+    const delay = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(docum
