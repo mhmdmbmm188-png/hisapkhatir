@@ -157,6 +157,11 @@
             background: #fff;
         }
 
+        /* تنسيق حقل التاريخ لتوضيح الأيام المسجلة */
+        input[type="date"] {
+            position: relative;
+        }
+
         .day-record-box {
             background: #f1f5f9;
             border: 1.5px solid #cbd5e1;
@@ -213,6 +218,56 @@
             padding-bottom: 2px;
         }
 
+        /* نافذة التقويم المخصصة لتلوين الأيام المسجلة بالأخضر */
+        .custom-calendar-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+        .calendar-card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .cal-day-name {
+            font-size: 12px;
+            font-weight: 800;
+            color: #64748b;
+            padding-bottom: 6px;
+        }
+        .cal-day {
+            padding: 10px 0;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #1e293b;
+        }
+        .cal-day.recorded {
+            background: #22c55e !important; /* لون أخضر للأيام المسجلة */
+            color: white !important;
+        }
+        .cal-day.selected {
+            border: 2px solid #4f46e5;
+        }
+        .cal-day.empty {
+            background: transparent;
+            cursor: default;
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -247,8 +302,9 @@
             <div class="section-title" style="font-size:13px;">تسجيل حركة يومية</div>
             
             <div class="input-group">
-                <label>التاريخ</label>
-                <input type="date" id="recordDate" onchange="checkAutoWeekend()">
+                <label>التاريخ (اضغط لاختيار اليوم ومعرفة المسجل)</label>
+                <input type="text" id="recordDateDisplay" readonly onclick="openCalendarModal()" style="cursor: pointer; background: #fff; text-align: center; font-weight: 800; color: #4f46e5;">
+                <input type="hidden" id="recordDate" onchange="checkAutoWeekend()">
             </div>
 
             <div class="input-group">
@@ -292,7 +348,7 @@
 </div>
 
 <!-- نافذة إضافة عامل جديد -->
-<div id="addWorkerModal" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; padding: 20px;">
+<div id="addWorkerModal" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; padding: 20px; z-index: 1000;">
     <div style="background:white; padding:20px; border-radius:20px; width:100%; max-width:380px;">
         <div class="section-title">إضافة عامل جديد</div>
         <div class="input-group">
@@ -308,16 +364,44 @@
     </div>
 </div>
 
+<!-- نافذة التقويم المخصص لتلوين الأيام المسجلة بالأخضر -->
+<div id="calendarModal" class="custom-calendar-modal hidden">
+    <div class="calendar-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <button class="btn-secondary" onclick="changeCalendarMonth(-1)">▶</button>
+            <span id="calMonthYearTitle" style="font-weight: 800; color: #312e81; font-size: 15px;"></span>
+            <button class="btn-secondary" onclick="changeCalendarMonth(1)">◀</button>
+        </div>
+        <div class="calendar-grid">
+            <div class="cal-day-name">أحد</div>
+            <div class="cal-day-name">إثنين</div>
+            <div class="cal-day-name">ثلاثاء</div>
+            <div class="cal-day-name">أربعاء</div>
+            <div class="cal-day-name">خميس</div>
+            <div class="cal-day-name">جمعة</div>
+            <div class="cal-day-name">سبت</div>
+        </div>
+        <div id="calDaysContainer" class="calendar-grid" style="margin-top: 6px;"></div>
+        <button class="btn-secondary" onclick="closeCalendarModal()" style="width: 100%; margin-top: 14px;">إغلاق</button>
+    </div>
+</div>
+
 <script>
 let workers = JSON.parse(localStorage.getItem('my_workers_data')) || [];
 let activeWorkerId = null;
+let calCurrentDate = new Date();
 
-// ضبط تاريخ اليوم افتراضياً وفحص إذا كان عطلة
-document.getElementById('recordDate').valueAsDate = new Date();
-checkAutoWeekend();
+// ضبط تاريخ اليوم افتراضياً
+const todayStr = new Date().toISOString().split('T')[0];
+document.getElementById('recordDate').value = todayStr;
+updateDateDisplay(todayStr);
 
 function saveData() {
     localStorage.setItem('my_workers_data', JSON.stringify(workers));
+}
+
+function updateDateDisplay(dateStr) {
+    document.getElementById('recordDateDisplay').value = dateStr;
 }
 
 function getDayNameAndDateStr(dateString) {
@@ -333,7 +417,6 @@ function checkAutoWeekend() {
     const { dayOfWeek } = getDayNameAndDateStr(dateVal);
     const statusSelect = document.getElementById('recordStatus');
     
-    // 0 = الأحد, 6 = السبت
     if (dayOfWeek === 0 || dayOfWeek === 6) {
         statusSelect.value = 'weekend';
     } else {
@@ -411,6 +494,8 @@ function openWorkerProfile(index) {
     document.getElementById('mainHomeView').classList.add('hidden');
     document.getElementById('workerProfileView').classList.remove('hidden');
     
+    document.getElementById('recordDate').value = todayStr;
+    updateDateDisplay(todayStr);
     checkAutoWeekend();
     renderWorkerDays();
 }
@@ -432,6 +517,75 @@ function toggleRecordFields() {
     }
 }
 
+// إدارة التقويم المخصص وتلوين الأيام المسجلة
+function openCalendarModal() {
+    document.getElementById('calendarModal').classList.remove('hidden');
+    renderCustomCalendar();
+}
+
+function closeCalendarModal() {
+    document.getElementById('calendarModal').classList.add('hidden');
+}
+
+function changeCalendarMonth(direction) {
+    calCurrentDate.setMonth(calCurrentDate.getMonth() + direction);
+    renderCustomCalendar();
+}
+
+function renderCustomCalendar() {
+    const year = calCurrentDate.getFullYear();
+    const month = calCurrentDate.getMonth();
+    
+    const monthsNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    document.getElementById('calMonthYearTitle').innerText = `${monthsNames[month]} ${year}`;
+
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    
+    const container = document.getElementById('calDaysContainer');
+    container.innerHTML = '';
+
+    const worker = workers[activeWorkerId];
+    const recordedDatesSet = new Set(worker.records.map(r => r.date));
+    const selectedDate = document.getElementById('recordDate').value;
+
+    // الفراغات قبل بداية الشهر
+    for (let i = 0; i < firstDayIndex; i++) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'cal-day empty';
+        container.appendChild(emptyDiv);
+    }
+
+    // أيام الشهر
+    for (let d = 1; d <= totalDays; d++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'cal-day';
+        dayDiv.innerText = d;
+
+        const mFormatted = String(month + 1).padStart(2, '0');
+        const dFormatted = String(d).padStart(2, '0');
+        const currentDateStr = `${year}-${mFormatted}-${dFormatted}`;
+
+        // إذا كان اليوم مسجلاً مسبقاً، يصبح لونه أخضر
+        if (recordedDatesSet.has(currentDateStr)) {
+            dayDiv.classList.add('recorded');
+        }
+
+        if (currentDateStr === selectedDate) {
+            dayDiv.classList.add('selected');
+        }
+
+        dayDiv.onclick = function() {
+            document.getElementById('recordDate').value = currentDateStr;
+            updateDateDisplay(currentDateStr);
+            checkAutoWeekend();
+            closeCalendarModal();
+        };
+
+        container.appendChild(dayDiv);
+    }
+}
+
 function saveDayRecord() {
     const date = document.getElementById('recordDate').value;
     const status = document.getElementById('recordStatus').value;
@@ -443,132 +597,4 @@ function saveDayRecord() {
 
     const overtime = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertime').value) || 0);
     const overtimeDouble = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertimeDouble').value) || 0);
-    const delay = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordDelay').value) || 0);
-    const withdrawn = parseFloat(document.getElementById('recordWithdrawn').value) || 0;
-
-    const worker = workers[activeWorkerId];
-    worker.records = worker.records.filter(r => r.date !== date);
-
-    worker.records.push({
-        date: date,
-        status: status,
-        overtime: overtime,
-        overtimeDouble: overtimeDouble,
-        delay: delay,
-        withdrawn: withdrawn
-    });
-
-    worker.records.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    saveData();
-    renderWorkerDays();
-    alert('✅ تم حفظ الحركة بنجاح');
-}
-
-function deleteDayRecord(date) {
-    if (confirm('⚠️ هل أنت متأكد من حذف سجل هذا اليوم؟')) {
-        const worker = workers[activeWorkerId];
-        worker.records = worker.records.filter(r => r.date !== date);
-        saveData();
-        renderWorkerDays();
-    }
-}
-
-function renderWorkerDays() {
-    const worker = workers[activeWorkerId];
-    const container = document.getElementById('workerDaysList');
-    container.innerHTML = '';
-
-    if (worker.records.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; padding:10px;">لا توجد أيام مسجلة بعد.</div>';
-        document.getElementById('workerFinancialSummary').innerHTML = '<div>لا توجد بيانات حسابية بعد</div>';
-        return;
-    }
-
-    const dailyRate = worker.salary / 30;
-    const hourlyRate = dailyRate / 9;
-
-    let p1Work = 0, p1Abs = 0, p1Ot15 = 0, p1Ot2 = 0, p1Delay = 0, p1Withdrawn = 0;
-    let p2Work = 0, p2Abs = 0, p2Ot15 = 0, p2Ot2 = 0, p2Delay = 0, p2Withdrawn = 0;
-
-    worker.records.forEach(rec => {
-        const { dayName } = getDayNameAndDateStr(rec.date);
-        const dayNum = parseInt(rec.date.split('-')[2]); // رقم اليوم من التاريخ
-
-        if (dayNum <= 15) {
-            if (rec.status === 'present') p1Work++;
-            if (rec.status === 'absent') p1Abs++;
-            p1Ot15 += rec.overtime;
-            p1Ot2 += rec.overtimeDouble;
-            p1Delay += rec.delay;
-            p1Withdrawn += rec.withdrawn;
-        } else {
-            if (rec.status === 'present') p2Work++;
-            if (rec.status === 'absent') p2Abs++;
-            p2Ot15 += rec.overtime;
-            p2Ot2 += rec.overtimeDouble;
-            p2Delay += rec.delay;
-            p2Withdrawn += rec.withdrawn;
-        }
-
-        const box = document.createElement('div');
-        box.className = 'day-record-box';
-        
-        let statusLabel = '🟢 دوام كامل';
-        if (rec.status === 'absent') statusLabel = '🔴 غائب';
-        if (rec.status === 'weekend') statusLabel = '🌴 عطلة رسمية (سبت/أحد)';
-
-        let detailsText = `الحالة: ${statusLabel} (يومية: ${dailyRate.toFixed(1)} ليرة)`;
-        if (rec.status === 'present') {
-            if (rec.overtime > 0) detailsText += ` | إضافي 1.5x: ${rec.overtime}س`;
-            if (rec.overtimeDouble > 0) detailsText += ` | إضافي 2x: ${rec.overtimeDouble}س`;
-            if (rec.delay > 0) detailsText += ` | تأخير: ${rec.delay}س`;
-        }
-        if (rec.withdrawn > 0) detailsText += ` | سحب/سلفية: ${rec.withdrawn} ليرة`;
-
-        box.innerHTML = `
-            <div class="day-record-header">
-                <span>📅 ${rec.date} (${dayName})</span>
-                <span style="cursor:pointer; color:#dc2626;" onclick="deleteDayRecord('${rec.date}')">حذف</span>
-            </div>
-            <div>${detailsText}</div>
-        `;
-        container.appendChild(box);
-    });
-
-    // حساب مبالغ الفترة الأولى (1 إلى 15)
-    const p1AmtWork = p1Work * dailyRate;
-    const p1AmtOt = (p1Ot15 * hourlyRate * 1.5) + (p1Ot2 * hourlyRate * 2);
-    const p1AmtDelay = p1Delay * hourlyRate;
-    const p1Net = p1AmtWork + p1AmtOt - p1AmtDelay - p1Withdrawn;
-
-    // حساب مبالغ الفترة الثانية (16 إلى 30)
-    const p2AmtWork = p2Work * dailyRate;
-    const p2AmtOt = (p2Ot15 * hourlyRate * 1.5) + (p2Ot2 * hourlyRate * 2);
-    const p2AmtDelay = p2Delay * hourlyRate;
-    const p2Net = p2AmtWork + p2AmtOt - p2AmtDelay - p2Withdrawn;
-
-    const totalNetMonth = p1Net + p2Net;
-
-    document.getElementById('workerFinancialSummary').innerHTML = `
-        <div class="period-box">
-            <div class="period-title">📌 محاسبة النصف الأول (من 1 إلى 15):</div>
-            <div>أيام الدوام: ${p1Work} يوم | السحوبات: ${p1Withdrawn} ليرة</div>
-            <div style="font-weight:800; color:#312e81;">صافي الفترة الأولى: ${p1Net.toFixed(1)} ليرة</div>
-        </div>
-
-        <div class="period-box">
-            <div class="period-title">📌 محاسبة النصف الثاني (من 16 إلى 30):</div>
-            <div>أيام الدوام: ${p2Work} يوم | السحوبات: ${p2Withdrawn} ليرة</div>
-            <div style="font-weight:800; color:#312e81;">صافي الفترة الثانية: ${p2Net.toFixed(1)} ليرة</div>
-        </div>
-
-        <div class="summary-total">إجمالي المستحق للشهر بالكامل: ${totalNetMonth.toFixed(2)} ليرة</div>
-    `;
-}
-
-renderWorkersList();
-</script>
-
-</body>
-</html>
+    const delay = status === 'w
