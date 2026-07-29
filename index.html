@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>حاسبة الرواتب - محمد المرعي</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .app {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+            color: #444;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        input:focus {
+            border-color: #2563eb;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .dynamic-fields-container {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .dynamic-input {
+            padding: 7px 10px;
+            font-size: 13px;
+            border: 1px dashed #9ca3af;
+            border-radius: 8px;
+            background: #f3f4f6;
+            width: 100%;
+        }
+
+        .results {
+            margin-top: 20px;
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            display: none;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            font-size: 13px;
+            color: #374151;
+            border-bottom: 1px dashed #d1d5db;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-item span:nth-child(2) {
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .sub-details {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .final-result {
+            background: #2563eb;
+            color: white;
+            padding: 14px;
+            margin-top: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-download {
+            background: #059669;
+        }
+        .btn-download:hover {
+            background: #047857;
+        }
+
+        .btn-share {
+            background: #2563eb;
+        }
+        .btn-share:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+
+<body>
+<div class="app">
+    <!-- المدخلات بالأول -->
+    <div id="inputFormArea">
+        <div class="input-group">
+            <label>اسم العامل</label>
+            <input id="employeeName" placeholder="أدخل اسم العامل" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>الراتب الأساسي</label>
+            <input id="salary" type="number" placeholder="أدخل الراتب" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>أيام الدوام</label>
+            <input id="workDays" type="number" placeholder="عدد أيام الدوام" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>إضافي ساعة بساعة ونصف</label>
+            <input id="overtime" type="number" placeholder="عدد الساعات" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>إضافي ساعة بساعتين</label>
+            <input id="overtimeDouble" type="number" placeholder="عدد الساعات" oninput="calculate()">
+        </div>
+        <div class="input-group">
+            <label>التأخير (بالساعات)</label>
+            <input id="delay" type="number" placeholder="عدد الساعات" oninput="updateDynamicInputs(); calculate();">
+            <div id="delayDates" class="dynamic-fields-container"></div>
+        </div>
+        <div class="input-group">
+            <label>الغياب (بالأيام)</label>
+            <input id="absence" type="number" placeholder="عدد الأيام" oninput="updateDynamicInputs(); calculate();">
+            <div id="absenceDates" class="dynamic-fields-container"></div>
+        </div>
+        <div class="input-group">
+            <label>ساحب</label>
+            <input id="withdrawn" type="number" placeholder="المبلغ المسحوب" oninput="calculate()">
+        </div>
+    </div>
+
+    <!-- قسم النتائج والصورة تحت -->
+    <div id="captureArea" style="background: #ffffff; padding: 15px; border-radius: 12px; margin-top: 15px; display: none;">
+        <h2 style="font-size: 18px; margin-bottom: 12px; text-align: center; color: #1e3c72;">نتيجة حساب الراتب</h2>
+        <div class="results" id="resultsContent" style="display: block; margin-top: 0; border: none; background: transparent; padding: 0;"></div>
+    </div>
+
+    <div class="buttons-container">
+        <button class="btn-action btn-download" onclick="downloadImage()">حفظ صورة</button>
+        <button class="btn-action btn-share" onclick="shareImage()">مشاركة عبر التطبيقات</button>
+    </div>
+</div>
+
+<script>
+function updateDynamicInputs() {
+    renderSubInputs('delay', 'delayDates', 'تاريخ/ساعة التأخير');
+    renderSubInputs('absence', 'absenceDates', 'تاريخ الغياب');
+}
+
+function renderSubInputs(countId, containerId, placeholderText) {
+    const count = parseInt(document.getElementById(countId).value) || 0;
+    const container = document.getElementById(containerId);
+    
+    const existingValues = [];
+    container.querySelectorAll('input').forEach(input => existingValues.push(input.value));
+
+    container.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'dynamic-input';
+        input.placeholder = `${placeholderText} ${i + 1}`;
+        input.value = existingValues[i] || '';
+        input.oninput = calculate;
+        container.appendChild(input);
+    }
+}
+
+function getSubValues(containerId) {
+    const container = document.getElementById(containerId);
+    const values = [];
+    container.querySelectorAll('input').forEach(input => {
+        if (input.value.trim() !== '') values.push(input.value.trim());
+    });
+    return values;
+}
+
+function calculate() {
+    const employeeName = document.getElementById('employeeName').value.trim();
+    const salary = parseFloat(document.getElementById('salary').value) || 0;
+    const workDays = parseFloat(document.getElementById('workDays').value) || 0;
+    const overtime = parseFloat(document.getElementById('overtime').value) || 0;
+    const overtimeDouble = parseFloat(document.getElementById('overtimeDouble').value) || 0;
+    const delay = parseFloat(document.getElementById('delay').value) || 0;
+    const absence = parseFloat(document.getElementById('absence').value) || 0;
+    const withdrawn = parseFloat(document.getElementById('withdrawn').value) || 0;
+
+    const resultsBox = document.getElementById('resultsContent');
+    const captureArea = document.getElementById('captureArea');
+
+    if (salary === 0 && workDays === 0) {
+        captureArea.style.display = 'none';
+        return;
+    }
+
+    captureArea.style.display = 'block';
+
+    const daily = salary / 30;
+    const hourly = daily / 9;
+    
+    const rate15 = hourly * 1.5;
+    const rate2 = hourly * 2;
+
+    const totalWorkDaysAmount = daily * workDays;
+    const totalOvertime15 = overtime * rate15;
+    const totalOvertime2 = overtimeDouble * rate2;
+    const totalDelayCut = delay * hourly;
+    const totalAbsenceCut = absence * daily;
+
+    const netTotal = totalWorkDaysAmount + totalOvertime15 + totalOvertime2 - totalDelayCut - totalAbsenceCut - withdrawn;
+
+    const delayDates = getSubValues('delayDates');
+    const absenceDates = getSubValues('absenceDates');
+
+    let htmlContent = '';
+    if (employeeName !== '') {
+        htmlContent += `<div class="result-item" style="font-weight:bold; color:#2563eb; font-size:14px; margin-bottom:5px;"><span>اسم العامل:</span><span>${employeeName}</span></div>`;
+    }
+
+    htmlContent += `
+        <div class="result-item"><span>أيام الدوام (${workDays} يوم × ${daily.toFixed(2)}):</span><span>${totalWorkDaysAmount.toFixed(2)} ليرة</span></div>
+        <div class="result-item"><span>إضافي ساعة بساعة ونصف (${overtime} ساعة × ${rate15.toFixed(2)}):</span><span>+ ${totalOvertime15.toFixed(2)} ليرة</span></div>
+        <div class="result-item"><span>إضافي ساعة بساعتين (${overtimeDouble} ساعة × ${rate2.toFixed(2)}):</span><span>+ ${totalOvertime2.toFixed(2)} ليرة</span></div>
+        
+        <div class="result-item" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+                <span>التأخير (${delay} ساعة × ${hourly.toFixed(2)}):</span>
+                <span>- ${totalDelayCut.toFixed(2)} ليرة</span>
+            </div>
+            ${delayDates.length > 0 ? `<div class="sub-details">التواريخ: ${delayDates.join(' ، ')}</div>` : ''}
+        </div>
+
+        <div class="result-item" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+                <span>الغياب (${absence} يوم × ${daily.toFixed(2)}):</span>
+                <span>- ${totalAbsenceCut.toFixed(2)} ليرة</span>
+            </div>
+            ${absenceDates.length > 0 ? `<div class="sub-details">التواريخ: ${absenceDates.join(' ، ')}</div>` : ''}
+        </div>
+
+        <div class="result-item"><span>ساحب:</span><span>- ${withdrawn.toFixed(2)} ليرة</span></div>
+        
+        <div class="final-result">
+            <span>الناتج</span>
+            <span>${netTotal.toFixed(2)} ليرة</span>
+        </div>
+    `;
+
+    resultsBox.innerHTML = htmlContent;
+}
+
+function downloadImage() {
+    html2canvas(document.querySelector("#captureArea")).then(canvas => {
+        let link = document.createElement('a');
+        link.download = 'salary-report.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+}
+
+function shareImage() {
+    const employeeName = document.getElementById('employeeName').value.trim() || 'عامل';
+    const netTotalElem = document.querySelector('.final-result span:last-child');
+    const netTotalText = netTotalElem ? netTotalElem.innerText : '0';
+
+    html2canvas(document.querySelector("#captureArea")).then(canvas => {
+        canvas.toBlob(blob => {
+            const file = new File([blob], "salary-report.png", { type: "image/png" });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({
+                    files: [file],
+                    title: 'حاسبة الرواتب',
+                    text: `راتب العامل: ${employeeName} - الناتج: ${netTotalText}`
+                }).catch(() => {});
+            } else {
+                alert('خاصية المشاركة المباشرة غير متوفرة في متصفحك الحالي، يمكنك استخدام زر حفظ الصورة.');
+            }
+        });
+    });
+}
+</script>
+
+</body>
+</html>
