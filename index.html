@@ -189,28 +189,6 @@
             margin-bottom: 3px;
         }
 
-        /* تصميم النوافذ المنبثقة المتوافقة تماماً مع التطبيق */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            z-index: 9999;
-        }
-        .modal-overlay.active {
-            display: flex;
-        }
-        .modal-card {
-            background: white;
-            padding: 16px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 340px;
-        }
-
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -252,14 +230,29 @@
         <div class="developer-tag">إعداد: محمد المرعي</div>
     </div>
 
-    <!-- واجهة قائمة العمال الرئيسية -->
+    <!-- 1. واجهة قائمة العمال الرئيسية -->
     <div id="mainHomeView">
         <div class="section-title">قائمة العمال</div>
         <button class="btn-primary" onclick="openAddWorkerModal()">➕ إضافة عامل جديد</button>
         <div id="workersListContainer" style="max-height: 320px; overflow-y: auto; margin-top: 6px;"></div>
     </div>
 
-    <!-- واجهة ملف العامل الشخصي واليوميات -->
+    <!-- 2. واجهة إضافة عامل جديد (تم تحويلها لصفحة فرعية تضمن الاستجابة 100%) -->
+    <div id="addWorkerView" class="hidden">
+        <button class="btn-secondary" onclick="closeAddWorkerModal()" style="margin-bottom: 10px;">⬅ العودة للقائمة</button>
+        <div class="section-title">إضافة عامل جديد</div>
+        <div class="input-group">
+            <label>اسم العامل</label>
+            <input type="text" id="newWorkerName" placeholder="أدخل اسم العامل">
+        </div>
+        <div class="input-group">
+            <label>الراتب الشهري الأساسي</label>
+            <input type="number" id="newWorkerSalary" placeholder="أدخل الراتب">
+        </div>
+        <button class="btn-primary" onclick="addNewWorker()" style="margin-top: 10px;">💾 حفظ العامل</button>
+    </div>
+
+    <!-- 3. واجهة ملف العامل الشخصي واليوميات -->
     <div id="workerProfileView" class="hidden">
         <button class="btn-secondary" onclick="backToHome()" style="margin-bottom: 8px;">⬅ العودة للقائمة</button>
         
@@ -273,7 +266,7 @@
             
             <div class="input-group">
                 <label>التاريخ (اضغط لاختيار اليوم)</label>
-                <input type="text" id="recordDateDisplay" readonly onclick="openCalendarModal()" style="cursor: pointer; background: #fff; text-align: center; font-weight: 800; color: #4f46e5;">
+                <input type="text" id="recordDateDisplay" readonly onclick="openCalendarView()" style="cursor: pointer; background: #fff; text-align: center; font-weight: 800; color: #4f46e5;">
                 <input type="hidden" id="recordDate" onchange="checkAutoWeekend()">
             </div>
 
@@ -315,51 +308,33 @@
 
         <div class="summary-box" id="workerFinancialSummary"></div>
     </div>
-</div>
 
-<!-- نافذة إضافة عامل جديد -->
-<div id="addWorkerModal" class="modal-overlay">
-    <div class="modal-card">
-        <div class="section-title">إضافة عامل جديد</div>
-        <div class="input-group">
-            <label>اسم العامل</label>
-            <input type="text" id="newWorkerName" placeholder="أدخل اسم العامل">
+    <!-- 4. واجهة التقويم المخصص -->
+    <div id="calendarView" class="hidden">
+        <button class="btn-secondary" onclick="closeCalendarView()" style="margin-bottom: 10px;">⬅ العودة لملف العامل</button>
+        <div style="text-align: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <button class="btn-secondary" style="width: auto; padding: 6px 12px;" onclick="changeCalendarMonth(-1)">▶</button>
+                <span id="calMonthYearTitle" style="font-weight: 800; color: #312e81; font-size: 14px;"></span>
+                <button class="btn-secondary" style="width: auto; padding: 6px 12px;" onclick="changeCalendarMonth(1)">◀</button>
+            </div>
+            <div class="calendar-grid">
+                <div class="cal-day-name">أحد</div>
+                <div class="cal-day-name">إثنين</div>
+                <div class="cal-day-name">ثلاثاء</div>
+                <div class="cal-day-name">أربعاء</div>
+                <div class="cal-day-name">خميس</div>
+                <div class="cal-day-name">جمعة</div>
+                <div class="cal-day-name">سبت</div>
+            </div>
+            <div id="calDaysContainer" class="calendar-grid" style="margin-top: 4px;"></div>
+            
+            <div style="display: flex; justify-content: space-around; margin-top: 10px; font-size: 10px; font-weight: 700; color: #64748b;">
+                <span><span style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%;"></span> داوم</span>
+                <span><span style="display:inline-block; width:8px; height:8px; background:#dc2626; border-radius:50%;"></span> غائب</span>
+                <span><span style="display:inline-block; width:8px; height:8px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:50%;"></span> غير مسجل</span>
+            </div>
         </div>
-        <div class="input-group">
-            <label>الراتب الشهري الأساسي</label>
-            <input type="number" id="newWorkerSalary" placeholder="أدخل الراتب">
-        </div>
-        <button class="btn-primary" onclick="addNewWorker()">حفظ العامل</button>
-        <button class="btn-secondary" onclick="closeAddWorkerModal()">إلغاء</button>
-    </div>
-</div>
-
-<!-- نافذة التقويم المخصص الملون -->
-<div id="calendarModal" class="modal-overlay">
-    <div class="modal-card" style="text-align: center;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <button class="btn-secondary" style="width: auto; padding: 6px 12px;" onclick="changeCalendarMonth(-1)">▶</button>
-            <span id="calMonthYearTitle" style="font-weight: 800; color: #312e81; font-size: 14px;"></span>
-            <button class="btn-secondary" style="width: auto; padding: 6px 12px;" onclick="changeCalendarMonth(1)">◀</button>
-        </div>
-        <div class="calendar-grid">
-            <div class="cal-day-name">أحد</div>
-            <div class="cal-day-name">إثنين</div>
-            <div class="cal-day-name">ثلاثاء</div>
-            <div class="cal-day-name">أربعاء</div>
-            <div class="cal-day-name">خميس</div>
-            <div class="cal-day-name">جمعة</div>
-            <div class="cal-day-name">سبت</div>
-        </div>
-        <div id="calDaysContainer" class="calendar-grid" style="margin-top: 4px;"></div>
-        
-        <div style="display: flex; justify-content: space-around; margin-top: 10px; font-size: 10px; font-weight: 700; color: #64748b;">
-            <span><span style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%;"></span> داوم</span>
-            <span><span style="display:inline-block; width:8px; height:8px; background:#dc2626; border-radius:50%;"></span> غائب</span>
-            <span><span style="display:inline-block; width:8px; height:8px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:50%;"></span> غير مسجل</span>
-        </div>
-
-        <button class="btn-secondary" onclick="closeCalendarModal()" style="margin-top: 10px;">إغلاق</button>
     </div>
 </div>
 
@@ -429,11 +404,13 @@ function renderWorkersList() {
 function openAddWorkerModal() {
     document.getElementById('newWorkerName').value = '';
     document.getElementById('newWorkerSalary').value = '';
-    document.getElementById('addWorkerModal').classList.add('active');
+    document.getElementById('mainHomeView').classList.add('hidden');
+    document.getElementById('addWorkerView').classList.remove('hidden');
 }
 
 function closeAddWorkerModal() {
-    document.getElementById('addWorkerModal').classList.remove('active');
+    document.getElementById('addWorkerView').classList.add('hidden');
+    document.getElementById('mainHomeView').classList.remove('hidden');
 }
 
 function addNewWorker() {
@@ -493,13 +470,15 @@ function toggleRecordFields() {
     }
 }
 
-function openCalendarModal() {
-    document.getElementById('calendarModal').classList.add('active');
+function openCalendarView() {
+    document.getElementById('workerProfileView').classList.add('hidden');
+    document.getElementById('calendarView').classList.remove('hidden');
     renderCustomCalendar();
 }
 
-function closeCalendarModal() {
-    document.getElementById('calendarModal').classList.remove('active');
+function closeCalendarView() {
+    document.getElementById('calendarView').classList.add('hidden');
+    document.getElementById('workerProfileView').classList.remove('hidden');
 }
 
 function changeCalendarMonth(direction) {
@@ -565,7 +544,7 @@ function renderCustomCalendar() {
                 checkAutoWeekend();
             }
             toggleRecordFields();
-            closeCalendarModal();
+            closeCalendarView();
         };
 
         container.appendChild(dayDiv);
@@ -583,4 +562,7 @@ function saveDayRecord() {
 
     const overtime = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertime').value) || 0);
     const overtimeDouble = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertimeDouble').value) || 0);
-    const delay = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(docum
+    const delay = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordDelay').value) || 0);
+    const withdrawn = parseFloat(document.getElementById('recordWithdrawn').value) || 0;
+
+    const worker = workers[
