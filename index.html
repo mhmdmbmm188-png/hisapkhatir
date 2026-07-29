@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>سجل العمال والرواتب - محمد المرعي</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Tahoma, Arial, sans-serif; }
@@ -38,7 +35,7 @@
         .cal-day.recorded-weekend { background: #64748b !important; color: white !important; }
         .cal-day.empty { background: transparent; cursor: default; }
         .hidden { display: none !important; }
-        #syncStatus { text-align: center; font-size: 11px; padding: 6px; border-radius: 6px; margin-top: 6px; font-weight: 700; background: #f1f5f9; color: #64748b; }
+        #syncStatus { text-align: center; font-size: 11px; padding: 6px; border-radius: 6px; margin-top: 6px; font-weight: 700; background: #dcfce7; color: #166534; }
     </style>
 </head>
 <body>
@@ -47,7 +44,7 @@
     <div class="app-header">
         <h2>سجل العمال والرواتب</h2>
         <div class="developer-tag">إعداد: محمد المرعي</div>
-        <div id="syncStatus">🔄 جاري الاتصال بالسحابة...</div>
+        <div id="syncStatus">✅ يعمل بذاكرة الهاتف المحلية (بدون مشاكل)</div>
     </div>
 
     <!-- واجهة الرئيسية -->
@@ -154,22 +151,7 @@
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDcQOkPejPSlzOxQixqaQFViLO96QRJo8Q",
-        authDomain: "hisapkhatir.firebaseapp.com",
-        databaseURL: "https://hisapkhatir-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "hisapkhatir",
-        storageBucket: "hisapkhatir.firebasestorage.app",
-        messagingSenderId: "493775178117",
-        appId: "1:493775178117:web:4a2daf8c7f75011f55dcec"
-    };
-
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const dbRef = firebase.database().ref('workers_data');
-
-    let workers = [];
+    let workers = JSON.parse(localStorage.getItem('workers_data_local')) || [];
     let activeWorkerId = null;
     let calCurrentDate = new Date();
     
@@ -179,50 +161,11 @@
     document.getElementById('recordDate').value = todayStr;
     document.getElementById('recordDateDisplay').value = todayStr;
 
-    const statusEl = document.getElementById('syncStatus');
-
-    function updateStatus(text, type) {
-        statusEl.innerText = text;
-        if (type === 'success') {
-            statusEl.style.background = '#dcfce7';
-            statusEl.style.color = '#166534';
-        } else if (type === 'error') {
-            statusEl.style.background = '#fee2e2';
-            statusEl.style.color = '#991b1b';
-        } else {
-            statusEl.style.background = '#f1f5f9';
-            statusEl.style.color = '#64748b';
-        }
+    function saveLocalStorage() {
+        localStorage.setItem('workers_data_local', JSON.stringify(workers));
     }
 
-    let isInitialLoad = true;
-    dbRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        workers = (data && data.list) ? data.list : [];
-        renderWorkersList();
-        if (activeWorkerId !== null && workers[activeWorkerId]) {
-            renderWorkerDays();
-        }
-        if (isInitialLoad) {
-            isInitialLoad = false;
-            updateStatus('✅ متصل بالسحابة (جاهز للاستخدام)', 'success');
-        }
-    }, (error) => {
-        console.error(error);
-        updateStatus('❌ خطأ في الاتصال بالسحابة', 'error');
-    });
-
-    function saveCloudData(callback) {
-        updateStatus('💾 جاري الحفظ...', 'loading');
-        dbRef.set({ list: workers }).then(() => {
-            updateStatus('✅ تم الحفظ بنجاح في السحابة', 'success');
-            if (callback) callback();
-        }).catch(err => {
-            console.error(err);
-            updateStatus('❌ فشل الحفظ بالسحابة', 'error');
-            alert('فشل الحفظ: تحقق من الاتصال بالإنترنت.');
-        });
-    }
+    renderWorkersList();
 
     document.getElementById('openAddBtn').addEventListener('click', function() {
         document.getElementById('newWorkerName').value = '';
@@ -246,12 +189,11 @@
         }
 
         workers.push({ name: name, salary: salary, records: [] });
+        saveLocalStorage();
         
-        saveCloudData(() => {
-            document.getElementById('addWorkerView').classList.add('hidden');
-            document.getElementById('mainHomeView').classList.remove('hidden');
-            renderWorkersList();
-        });
+        document.getElementById('addWorkerView').classList.add('hidden');
+        document.getElementById('mainHomeView').classList.remove('hidden');
+        renderWorkersList();
     });
 
     document.getElementById('backToHomeBtn').addEventListener('click', function() {
@@ -323,10 +265,8 @@
         });
 
         worker.records.sort((a, b) => new Date(b.date) - new Date(a.date));
-        
-        saveCloudData(() => {
-            renderWorkerDays();
-        });
+        saveLocalStorage();
+        renderWorkerDays();
     });
 
     function renderWorkersList() {
@@ -370,9 +310,8 @@
         event.stopPropagation();
         if (confirm('هل أنت متأكد من حذف هذا العامل؟')) {
             workers.splice(index, 1);
-            saveCloudData(() => {
-                renderWorkersList();
-            });
+            saveLocalStorage();
+            renderWorkersList();
         }
     }
     window.deleteWorker = deleteWorker;
@@ -411,4 +350,51 @@
             recordDiv.innerHTML = `
                 <div>
                     <div class="day-record-header">${rec.date} - ${statusText}</div>
-                    
+                    <div style="color:#64748b; font-size:10px;">إضافي: ${rec.overtime} | إضافي 2x: ${rec.overtimeDouble} | تأخير: ${rec.delay} | سحب: ${rec.withdrawn}</div>
+                </div>
+                <button class="btn-danger" type="button" onclick="deleteRecord(${index})">حذف</button>
+            `;
+            container.appendChild(recordDiv);
+        });
+
+        const daily = worker.salary / 30;
+        const hourly = daily / 9; 
+        
+        const earnedFromDays = totalDays * daily;
+        const earnedFromOvertime = (totalOvertime * hourly * 1.5) + (totalOvertimeDouble * hourly * 2);
+        const cutFromDelay = totalDelay * hourly;
+        const netTotal = earnedFromDays + earnedFromOvertime - cutFromDelay - totalWithdrawn;
+
+        summaryContainer.innerHTML = `
+            <div>أيام الدوام: ${totalDays} يوم (${earnedFromDays.toFixed(1)} ليرة)</div>
+            <div>مكافأة الإضافي: +${earnedFromOvertime.toFixed(1)} ليرة</div>
+            <div>خصم التأخير: -${cutFromDelay.toFixed(1)} ليرة</div>
+            <div>المسحوبات: -${totalWithdrawn.toFixed(1)} ليرة</div>
+            <div class="summary-total">الصافي المستحق: ${netTotal.toFixed(1)} ليرة</div>
+        `;
+    }
+
+    function deleteRecord(recordIndex) {
+        if (confirm('هل أنت متأكد من حذف حركة هذا اليوم؟')) {
+            workers[activeWorkerId].records.splice(recordIndex, 1);
+            saveLocalStorage();
+            renderWorkerDays();
+        }
+    }
+    window.deleteRecord = deleteRecord;
+
+    document.getElementById('copyReportBtn').addEventListener('click', function() {
+        if (activeWorkerId === null || !workers[activeWorkerId]) return;
+        
+        const worker = workers[activeWorkerId];
+        const records = worker.records || [];
+        
+        const daily = worker.salary / 30;
+        const hourly = daily / 9;
+        
+        let totalDays = 0, totalAbsence = 0, totalOvertime = 0, totalOvertimeDouble = 0, totalDelay = 0, totalWithdrawn = 0;
+        let absentDates = [], withdrawnDetails = [], overtimeDetails = [];
+        
+        records.forEach(rec => {
+            if (rec.status === 'present') totalDays++;
+            else if (rec.status === 'absent'
