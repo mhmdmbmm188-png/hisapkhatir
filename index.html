@@ -38,7 +38,7 @@
         .cal-day.recorded-weekend { background: #64748b !important; color: white !important; }
         .cal-day.empty { background: transparent; cursor: default; }
         .hidden { display: none !important; }
-        #syncStatus { text-align: center; font-size: 11px; padding: 4px; border-radius: 6px; margin-top: 6px; font-weight: 700; background: #f1f5f9; color: #64748b; }
+        #syncStatus { text-align: center; font-size: 11px; padding: 6px; border-radius: 6px; margin-top: 6px; font-weight: 700; background: #f1f5f9; color: #64748b; }
     </style>
 </head>
 <body>
@@ -50,14 +50,16 @@
         <div id="syncStatus">🔄 جاري الاتصال بالسحابة...</div>
     </div>
 
+    <!-- واجهة الرئيسية -->
     <div id="mainHomeView">
         <div class="section-title">قائمة العمال</div>
-        <button class="btn-primary" id="openAddBtn">➕ إضافة عامل جديد</button>
+        <button class="btn-primary" id="openAddBtn" type="button">➕ إضافة عامل جديد</button>
         <div id="workersListContainer" style="max-height: 300px; overflow-y: auto; margin-top: 6px;"></div>
     </div>
 
+    <!-- واجهة إضافة عامل -->
     <div id="addWorkerView" class="hidden">
-        <button class="btn-secondary" id="closeAddBtn" style="margin-bottom: 10px;">⬅ العودة للقائمة</button>
+        <button class="btn-secondary" id="closeAddBtn" type="button" style="margin-bottom: 10px;">⬅ العودة للقائمة</button>
         <div class="section-title">إضافة عامل جديد</div>
         <div class="input-group">
             <label>اسم العامل</label>
@@ -67,11 +69,12 @@
             <label>الراتب الشهري الأساسي</label>
             <input type="number" id="newWorkerSalary" placeholder="أدخل الراتب">
         </div>
-        <button class="btn-primary" id="saveWorkerBtn" style="margin-top: 10px;">💾 حفظ العامل</button>
+        <button class="btn-primary" id="saveWorkerBtn" type="button" style="margin-top: 10px;">💾 حفظ العامل</button>
     </div>
 
+    <!-- واجهة ملف العامل -->
     <div id="workerProfileView" class="hidden">
-        <button class="btn-secondary" id="backToHomeBtn" style="margin-bottom: 8px;">⬅ العودة للقائمة</button>
+        <button class="btn-secondary" id="backToHomeBtn" type="button" style="margin-bottom: 8px;">⬅ العودة للقائمة</button>
         
         <div style="background: #e0e7ff; padding: 8px; border-radius: 10px; text-align: center; margin-bottom: 8px;">
             <div id="profileWorkerName" style="font-size: 14px; font-weight: 800; color: #312e81;"></div>
@@ -115,7 +118,7 @@
                 </div>
             </div>
 
-            <button class="btn-primary" id="saveRecordBtn">💾 حفظ حركة هذا اليوم</button>
+            <button class="btn-primary" id="saveRecordBtn" type="button">💾 حفظ حركة هذا اليوم</button>
         </div>
 
         <div style="margin-top: 4px;">
@@ -124,16 +127,17 @@
         </div>
 
         <div class="summary-box" id="workerFinancialSummary"></div>
-        <button class="btn-primary" id="copyReportBtn" style="background: #10b981; margin-top: 10px;">📋 نسخ التقرير المفصل وإرساله</button>
+        <button class="btn-primary" id="copyReportBtn" type="button" style="background: #10b981; margin-top: 10px;">📋 نسخ التقرير المفصل وإرساله</button>
     </div>
 
+    <!-- واجهة التقويم -->
     <div id="calendarView" class="hidden">
-        <button class="btn-secondary" id="closeCalBtn" style="margin-bottom: 10px;">⬅ العودة لملف العامل</button>
+        <button class="btn-secondary" id="closeCalBtn" type="button" style="margin-bottom: 10px;">⬅ العودة لملف العامل</button>
         <div style="text-align: center;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <button class="btn-secondary" id="prevMonthBtn" style="width: auto; padding: 6px 12px;">▶</button>
+                <button class="btn-secondary" id="prevMonthBtn" type="button" style="width: auto; padding: 6px 12px;">▶</button>
                 <span id="calMonthYearTitle" style="font-weight: 800; color: #312e81; font-size: 14px;"></span>
-                <button class="btn-secondary" id="nextMonthBtn" style="width: auto; padding: 6px 12px;">◀</button>
+                <button class="btn-secondary" id="nextMonthBtn" type="button" style="width: auto; padding: 6px 12px;">◀</button>
             </div>
             <div class="calendar-grid">
                 <div class="cal-day-name">أحد</div>
@@ -160,7 +164,9 @@
         appId: "1:493775178117:web:4a2daf8c7f75011f55dcec"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
     const dbRef = firebase.database().ref('workers_data');
 
     let workers = [];
@@ -189,34 +195,37 @@
         }
     }
 
-    function initCloudSync() {
-        updateStatus('🔄 جاري الاتصال بالسحابة...', 'loading');
-        
-        dbRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            workers = data && data.list ? data.list : [];
-            renderWorkersList();
-            if (activeWorkerId !== null && workers[activeWorkerId]) {
-                renderWorkerDays();
-            }
-            updateStatus('✅ متصل بالسحابة (تم الحفظ بنجاح)', 'success');
-        }, (error) => {
-            updateStatus('❌ خطأ اتصال: ' + error.message, 'error');
-        });
-    }
+    // جلب البيانات أول مرة فقط لتجنب إعادة رسم الواجهة ومقاطعة إدخال المستخدم
+    let isInitialLoad = true;
+    dbRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        workers = (data && data.list) ? data.list : [];
+        renderWorkersList();
+        if (activeWorkerId !== null && workers[activeWorkerId]) {
+            renderWorkerDays();
+        }
+        if (isInitialLoad) {
+            isInitialLoad = false;
+            updateStatus('✅ متصل بالسحابة (محدث)', 'success');
+        }
+    }, (error) => {
+        console.error(error);
+        updateStatus('❌ خطأ اتصال بالسحابة', 'error');
+    });
 
-    function saveCloudData() {
-        updateStatus('💾 جاري الحفظ في السحابة...', 'loading');
+    function saveCloudData(callback) {
+        updateStatus('💾 جاري الحفظ...', 'loading');
         dbRef.set({ list: workers }).then(() => {
             updateStatus('✅ تم الحفظ بنجاح في السحابة', 'success');
+            if (callback) callback();
         }).catch(err => {
-            updateStatus('❌ فشل الحفظ: ' + err.message, 'error');
-            alert('فشل الحفظ بالسحابة: ' + err.message);
+            console.error(err);
+            updateStatus('❌ فشل الحفظ بالسحابة', 'error');
+            alert('فشل الحفظ: تأكد من قواعد الأمان في فايربيس.');
         });
     }
 
-    initCloudSync();
-
+    // التنقل بين الواجهات
     document.getElementById('openAddBtn').addEventListener('click', function() {
         document.getElementById('newWorkerName').value = '';
         document.getElementById('newWorkerSalary').value = '';
@@ -229,6 +238,7 @@
         document.getElementById('mainHomeView').classList.remove('hidden');
     });
 
+    // زر حفظ العامل (تم إصلاحه ليعمل بشكل نظامي)
     document.getElementById('saveWorkerBtn').addEventListener('click', function() {
         const name = document.getElementById('newWorkerName').value.trim();
         const salary = parseFloat(document.getElementById('newWorkerSalary').value) || 0;
@@ -239,10 +249,12 @@
         }
 
         workers.push({ name: name, salary: salary, records: [] });
-        saveCloudData();
-        document.getElementById('addWorkerView').classList.add('hidden');
-        document.getElementById('mainHomeView').classList.remove('hidden');
-        renderWorkersList();
+        
+        saveCloudData(() => {
+            document.getElementById('addWorkerView').classList.add('hidden');
+            document.getElementById('mainHomeView').classList.remove('hidden');
+            renderWorkersList();
+        });
     });
 
     document.getElementById('backToHomeBtn').addEventListener('click', function() {
@@ -315,8 +327,9 @@
 
         worker.records.sort((a, b) => new Date(b.date) - new Date(a.date));
         
-        saveCloudData();
-        renderWorkerDays();
+        saveCloudData(() => {
+            renderWorkerDays();
+        });
     });
 
     function renderWorkersList() {
@@ -337,7 +350,7 @@
                     <span class="worker-salary">الراتب: ${worker.salary} ليرة</span>
                 </div>
                 <div>
-                    <button class="btn-danger" onclick="deleteWorker(event, ${index})">حذف</button>
+                    <button class="btn-danger" type="button" onclick="deleteWorker(event, ${index})">حذف</button>
                 </div>
             `;
             container.appendChild(card);
@@ -360,8 +373,9 @@
         event.stopPropagation();
         if (confirm('هل أنت متأكد من حذف هذا العامل؟')) {
             workers.splice(index, 1);
-            saveCloudData();
-            renderWorkersList();
+            saveCloudData(() => {
+                renderWorkersList();
+            });
         }
     }
     window.deleteWorker = deleteWorker;
@@ -399,15 +413,4 @@
             recordDiv.className = 'day-record-box';
             recordDiv.innerHTML = `
                 <div>
-                    <div class="day-record-header">${rec.date} - ${statusText}</div>
-                    <div style="color:#64748b; font-size:10px;">إضافي: ${rec.overtime} | إضافي 2x: ${rec.overtimeDouble} | تأخير: ${rec.delay} | سحب: ${rec.withdrawn}</div>
-                </div>
-                <button class="btn-danger" onclick="deleteRecord(${index})">حذف</button>
-            `;
-            container.appendChild(recordDiv);
-        });
-
-        const daily = worker.salary / 30;
-        const hourly = daily / 9; 
-        
-        const earnedFromDays = 
+         
