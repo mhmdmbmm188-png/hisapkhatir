@@ -38,7 +38,7 @@
         .cal-day.recorded-weekend { background: #64748b !important; color: white !important; }
         .cal-day.empty { background: transparent; cursor: default; }
         .hidden { display: none !important; }
-        #syncStatus { text-align: center; font-size: 10px; color: #22c55e; margin-bottom: 6px; font-weight: 700; }
+        #syncStatus { text-align: center; font-size: 11px; padding: 4px; border-radius: 6px; margin-top: 6px; font-weight: 700; background: #f1f5f9; color: #64748b; }
     </style>
 </head>
 <body>
@@ -47,7 +47,7 @@
     <div class="app-header">
         <h2>سجل العمال والرواتب</h2>
         <div class="developer-tag">إعداد: محمد المرعي</div>
-        <div id="syncStatus">🌐 متصل دائمًا بالسحابة</div>
+        <div id="syncStatus">🔄 جاري الاتصال بالسحابة...</div>
     </div>
 
     <div id="mainHomeView">
@@ -170,20 +170,44 @@
     document.getElementById('recordDate').value = todayStr;
     document.getElementById('recordDateDisplay').value = todayStr;
 
+    const statusEl = document.getElementById('syncStatus');
+
+    function updateStatus(text, type) {
+        statusEl.innerText = text;
+        if (type === 'success') {
+            statusEl.style.background = '#dcfce7';
+            statusEl.style.color = '#166534';
+        } else if (type === 'error') {
+            statusEl.style.background = '#fee2e2';
+            statusEl.style.color = '#991b1b';
+        } else {
+            statusEl.style.background = '#f1f5f9';
+            statusEl.style.color = '#64748b';
+        }
+    }
+
     function initCloudSync() {
+        updateStatus('🔄 جاري الاتصال بالسحابة...', 'loading');
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
-            workers = data ? (data.list || []) : [];
+            workers = data && data.list ? data.list : [];
             renderWorkersList();
             if (activeWorkerId !== null && workers[activeWorkerId]) {
                 renderWorkerDays();
             }
+            updateStatus('✅ متصل بالسحابة (تم الحفظ بنجاح)', 'success');
+        }, (error) => {
+            updateStatus('❌ خطأ في الاتصال بالسحابة: ' + error.message, 'error');
         });
     }
 
     function saveCloudData() {
-        dbRef.set({ list: workers }).catch(err => {
-            alert('خطأ في الاتصال بالسحابة: ' + err.message);
+        updateStatus('💾 جاري الحفظ في السحابة...', 'loading');
+        dbRef.set({ list: workers }).then(() => {
+            updateStatus('✅ تم الحفظ بنجاح في السحابة', 'success');
+        }).catch(err => {
+            updateStatus('❌ فشل الحفظ: ' + err.message, 'error');
+            alert('فشل الحفظ بالسحابة: ' + err.message);
         });
     }
 
@@ -265,7 +289,7 @@
         }
 
         if (activeWorkerId === null || !workers[activeWorkerId]) {
-            alert('الرجاء اختيار العمال مرة أخرى');
+            alert('الرجاء اختيار العامل مرة أخرى');
             return;
         }
 
@@ -274,10 +298,8 @@
             worker.records = [];
         }
 
-        // إزالة الحركة القديمة لنفس اليوم إن وجدت لتحديثها
         worker.records = worker.records.filter(r => r.date !== date);
 
-        // إضافة الحركة الجديدة
         worker.records.push({
             date: date,
             status: status,
@@ -291,7 +313,6 @@
         
         saveCloudData();
         renderWorkerDays();
-        alert('✅ تم حفظ الحركة بنجاح!');
     });
 
     function renderWorkersList() {
@@ -386,25 +407,4 @@
                 document.getElementById('calendarView').classList.add('hidden');
                 document.getElementById('workerProfileView').classList.remove('hidden');
             };
-            container.appendChild(dayDiv);
-        }
-    }
-
-    function renderWorkerDays() {
-        if (activeWorkerId === null || !workers[activeWorkerId]) return;
-        const worker = workers[activeWorkerId];
-        const container = document.getElementById('workerDaysList');
-        container.innerHTML = '';
-
-        if (!worker.records || worker.records.length === 0) {
-            container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; padding:10px;">لا توجد حركات مسجلة بعد.</div>';
-            document.getElementById('workerFinancialSummary').innerHTML = `<div>الراتب الأساسي: ${worker.salary} ليرة</div><div class="summary-total">الصافي النهائي: ${worker.salary} ليرة</div>`;
-            return;
-        }
-
-        let totalWithdrawn = 0;
-        let totalOvertimePay = 0;
-        const hourRate = (worker.salary / 30 / 8);
-
-        worker.records.forEach((rec, idx) => {
-            to
+          
