@@ -157,11 +157,6 @@
             background: #fff;
         }
 
-        /* تنسيق حقل التاريخ لتوضيح الأيام المسجلة */
-        input[type="date"] {
-            position: relative;
-        }
-
         .day-record-box {
             background: #f1f5f9;
             border: 1.5px solid #cbd5e1;
@@ -218,7 +213,7 @@
             padding-bottom: 2px;
         }
 
-        /* نافذة التقويم المخصصة لتلوين الأيام المسجلة بالأخضر */
+        /* نافذة التقويم المخصص */
         .custom-calendar-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -256,12 +251,21 @@
             cursor: pointer;
             color: #1e293b;
         }
-        .cal-day.recorded {
-            background: #22c55e !important; /* لون أخضر للأيام المسجلة */
+        /* الأيام التي لم تُعدّل تبقى بيضاء أو بلون افتراضي خفيف */
+        .cal-day.recorded-present {
+            background: #22c55e !important; /* أخضر للدوام */
+            color: white !important;
+        }
+        .cal-day.recorded-absent {
+            background: #dc2626 !important; /* أحمر للغياب */
+            color: white !important;
+        }
+        .cal-day.recorded-weekend {
+            background: #64748b !important; /* رمادي للعطلة */
             color: white !important;
         }
         .cal-day.selected {
-            border: 2px solid #4f46e5;
+            border: 2px solid #1e293b;
         }
         .cal-day.empty {
             background: transparent;
@@ -302,7 +306,7 @@
             <div class="section-title" style="font-size:13px;">تسجيل حركة يومية</div>
             
             <div class="input-group">
-                <label>التاريخ (اضغط لاختيار اليوم ومعرفة المسجل)</label>
+                <label>اختر التاريخ من التقويم (الأخضر: داوم، الأحمر: غائب، الأبيض: غير مسجل)</label>
                 <input type="text" id="recordDateDisplay" readonly onclick="openCalendarModal()" style="cursor: pointer; background: #fff; text-align: center; font-weight: 800; color: #4f46e5;">
                 <input type="hidden" id="recordDate" onchange="checkAutoWeekend()">
             </div>
@@ -364,7 +368,7 @@
     </div>
 </div>
 
-<!-- نافذة التقويم المخصص لتلوين الأيام المسجلة بالأخضر -->
+<!-- نافذة التقويم المخصص الملون -->
 <div id="calendarModal" class="custom-calendar-modal hidden">
     <div class="calendar-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -382,7 +386,15 @@
             <div class="cal-day-name">سبت</div>
         </div>
         <div id="calDaysContainer" class="calendar-grid" style="margin-top: 6px;"></div>
-        <button class="btn-secondary" onclick="closeCalendarModal()" style="width: 100%; margin-top: 14px;">إغلاق</button>
+        
+        <!-- مفتاح الألوان للتوضيح -->
+        <div style="display: flex; justify-content: space-around; margin-top: 12px; font-size: 11px; font-weight: 700; color: #64748b;">
+            <span><span style="display:inline-block; width:10px; height:10px; background:#22c55e; border-radius:50%;"></span> داوم</span>
+            <span><span style="display:inline-block; width:10px; height:10px; background:#dc2626; border-radius:50%;"></span> غائب</span>
+            <span><span style="display:inline-block; width:10px; height:10px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:50%;"></span> لم يُعدّل</span>
+        </div>
+
+        <button class="btn-secondary" onclick="closeCalendarModal()" style="width: 100%; margin-top: 10px;">إغلاق</button>
     </div>
 </div>
 
@@ -391,7 +403,6 @@ let workers = JSON.parse(localStorage.getItem('my_workers_data')) || [];
 let activeWorkerId = null;
 let calCurrentDate = new Date();
 
-// ضبط تاريخ اليوم افتراضياً
 const todayStr = new Date().toISOString().split('T')[0];
 document.getElementById('recordDate').value = todayStr;
 updateDateDisplay(todayStr);
@@ -517,7 +528,6 @@ function toggleRecordFields() {
     }
 }
 
-// إدارة التقويم المخصص وتلوين الأيام المسجلة
 function openCalendarModal() {
     document.getElementById('calendarModal').classList.remove('hidden');
     renderCustomCalendar();
@@ -546,17 +556,21 @@ function renderCustomCalendar() {
     container.innerHTML = '';
 
     const worker = workers[activeWorkerId];
-    const recordedDatesSet = new Set(worker.records.map(r => r.date));
+    
+    // إنشاء خريطة لمعرفة حالة كل تاريخ مسجل
+    const recordsMap = {};
+    worker.records.forEach(r => {
+        recordsMap[r.date] = r.status; // 'present', 'absent', 'weekend'
+    });
+
     const selectedDate = document.getElementById('recordDate').value;
 
-    // الفراغات قبل بداية الشهر
     for (let i = 0; i < firstDayIndex; i++) {
         const emptyDiv = document.createElement('div');
         emptyDiv.className = 'cal-day empty';
         container.appendChild(emptyDiv);
     }
 
-    // أيام الشهر
     for (let d = 1; d <= totalDays; d++) {
         const dayDiv = document.createElement('div');
         dayDiv.className = 'cal-day';
@@ -566,35 +580,8 @@ function renderCustomCalendar() {
         const dFormatted = String(d).padStart(2, '0');
         const currentDateStr = `${year}-${mFormatted}-${dFormatted}`;
 
-        // إذا كان اليوم مسجلاً مسبقاً، يصبح لونه أخضر
-        if (recordedDatesSet.has(currentDateStr)) {
-            dayDiv.classList.add('recorded');
-        }
-
-        if (currentDateStr === selectedDate) {
-            dayDiv.classList.add('selected');
-        }
-
-        dayDiv.onclick = function() {
-            document.getElementById('recordDate').value = currentDateStr;
-            updateDateDisplay(currentDateStr);
-            checkAutoWeekend();
-            closeCalendarModal();
-        };
-
-        container.appendChild(dayDiv);
-    }
-}
-
-function saveDayRecord() {
-    const date = document.getElementById('recordDate').value;
-    const status = document.getElementById('recordStatus').value;
-    
-    if (!date) {
-        alert('الرجاء اختيار التاريخ');
-        return;
-    }
-
-    const overtime = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertime').value) || 0);
-    const overtimeDouble = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertimeDouble').value) || 0);
-    const delay = status === 'w
+        // تلوين الأيام بناءً على حالة التعديل والغياب
+        if (recordsMap[currentDateStr] === 'present') {
+            dayDiv.classList.add('recorded-present'); // أخضر
+        } else if (recordsMap[currentDateStr] === 'absent') {
+            dayDiv.classList.add('
