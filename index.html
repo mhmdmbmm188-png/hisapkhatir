@@ -124,6 +124,7 @@
         </div>
 
         <div class="summary-box" id="workerFinancialSummary"></div>
+        <button class="btn-primary" id="copyReportBtn" style="background: #10b981; margin-top: 10px;">📋 نسخ التقرير المفصل وإرساله</button>
     </div>
 
     <div id="calendarView" class="hidden">
@@ -165,7 +166,9 @@
     let workers = [];
     let activeWorkerId = null;
     let calCurrentDate = new Date();
-    const todayStr = new Date().toISOString().split('T')[0];
+    
+    const localOffset = new Date().getTimezoneOffset() * 60000;
+    const todayStr = new Date(Date.now() - localOffset).toISOString().split('T')[0];
 
     document.getElementById('recordDate').value = todayStr;
     document.getElementById('recordDateDisplay').value = todayStr;
@@ -404,11 +407,7 @@
             container.appendChild(recordDiv);
         });
 
-        // الحسابات المالية
         const daily = worker.salary / 30;
-        const hourly = daily / 9; // بافتراض 9 ساعات عمل يومياً
+        const hourly = daily / 9; 
         
-        const earnedFromDays = totalDays * daily;
-        const earnedFromOvertime = (totalOvertime * hourly * 1.5) + (totalOvertimeDouble * hourly * 2);
-        const cutFromDelay = totalDelay * hourly;
-    
+        const earnedFromDays = 
