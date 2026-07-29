@@ -175,12 +175,16 @@
             const data = snapshot.val();
             workers = data ? (data.list || []) : [];
             renderWorkersList();
-            if (activeWorkerId !== null) renderWorkerDays();
+            if (activeWorkerId !== null && workers[activeWorkerId]) {
+                renderWorkerDays();
+            }
         });
     }
 
     function saveCloudData() {
-        dbRef.set({ list: workers });
+        dbRef.set({ list: workers }).catch(err => {
+            alert('خطأ في الاتصال بالسحابة: ' + err.message);
+        });
     }
 
     initCloudSync();
@@ -260,8 +264,20 @@
             return;
         }
 
+        if (activeWorkerId === null || !workers[activeWorkerId]) {
+            alert('الرجاء اختيار العمال مرة أخرى');
+            return;
+        }
+
         const worker = workers[activeWorkerId];
+        if (!worker.records) {
+            worker.records = [];
+        }
+
+        // إزالة الحركة القديمة لنفس اليوم إن وجدت لتحديثها
         worker.records = worker.records.filter(r => r.date !== date);
+
+        // إضافة الحركة الجديدة
         worker.records.push({
             date: date,
             status: status,
@@ -272,9 +288,10 @@
         });
 
         worker.records.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
         saveCloudData();
         renderWorkerDays();
-        alert('✅ تم الحفظ تلقائياً');
+        alert('✅ تم حفظ الحركة بنجاح!');
     });
 
     function renderWorkersList() {
@@ -337,7 +354,7 @@
 
         const worker = workers[activeWorkerId];
         const recordsMap = {};
-        if (worker.records) {
+        if (worker && worker.records) {
             worker.records.forEach(r => { recordsMap[r.date] = r.status; });
         }
 
@@ -374,6 +391,7 @@
     }
 
     function renderWorkerDays() {
+        if (activeWorkerId === null || !workers[activeWorkerId]) return;
         const worker = workers[activeWorkerId];
         const container = document.getElementById('workerDaysList');
         container.innerHTML = '';
@@ -389,39 +407,4 @@
         const hourRate = (worker.salary / 30 / 8);
 
         worker.records.forEach((rec, idx) => {
-            totalWithdrawn += rec.withdrawn || 0;
-            const oPay = ((rec.overtime || 0) * hourRate * 1.5) + ((rec.overtimeDouble || 0) * hourRate * 2);
-            totalOvertimePay += oPay;
-
-            const box = document.createElement('div');
-            box.className = 'day-record-box';
-            let statusText = rec.status === 'present' ? 'داوم' : (rec.status === 'absent' ? 'غائب' : 'عطلة');
-            box.innerHTML = `
-                <div>
-                    <div class="day-record-header">${rec.date} - [${statusText}]</div>
-                    <div style="color: #475569;">إضافي: ${(rec.overtime||0)+(rec.overtimeDouble||0)}س | مسحوب: ${rec.withdrawn||0} ليرة</div>
-                </div>
-                <button class="btn-danger" onclick="deleteRecord(${idx})">حذف</button>
-            `;
-            container.appendChild(box);
-        });
-
-        const netSalary = worker.salary + totalOvertimePay - totalWithdrawn;
-        document.getElementById('workerFinancialSummary').innerHTML = `
-            <div>الراتب الأساسي: ${worker.salary} ليرة</div>
-            <div>إجمالي الإضافات: +${totalOvertimePay.toFixed(1)} ليرة</div>
-            <div>إجمالي المسحوبات (السلف): -${totalWithdrawn} ليرة</div>
-            <div class="summary-total">الصافي النهائي للرصيد: ${netSalary.toFixed(1)} ليرة</div>
-        `;
-    }
-
-    function deleteRecord(index) {
-        const worker = workers[activeWorkerId];
-        worker.records.splice(index, 1);
-        saveCloudData();
-        renderWorkerDays();
-    }
-    window.deleteRecord = deleteRecord;
-</script>
-</body>
-</html>
+            to
