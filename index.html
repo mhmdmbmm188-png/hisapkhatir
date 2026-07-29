@@ -152,7 +152,7 @@
     const firebaseConfig = {
         apiKey: "AIzaSyDcQOkPejPSlzOxQixqaQFViLO96QRJo8Q",
         authDomain: "hisapkhatir.firebaseapp.com",
-        databaseURL: "https://hisapkhatir-default-rtdb.europe-west1.firebasedatabase.app",
+        databaseURL: "https://hisapkhatir-default-rtdb.firebaseio.com",
         projectId: "hisapkhatir",
         storageBucket: "hisapkhatir.firebasestorage.app",
         messagingSenderId: "493775178117",
@@ -188,6 +188,7 @@
 
     function initCloudSync() {
         updateStatus('🔄 جاري الاتصال بالسحابة...', 'loading');
+        
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
             workers = data && data.list ? data.list : [];
@@ -197,7 +198,7 @@
             }
             updateStatus('✅ متصل بالسحابة (تم الحفظ بنجاح)', 'success');
         }, (error) => {
-            updateStatus('❌ خطأ في الاتصال بالسحابة: ' + error.message, 'error');
+            updateStatus('❌ خطأ اتصال: ' + error.message, 'error');
         });
     }
 
@@ -407,4 +408,4 @@
                 document.getElementById('calendarView').classList.add('hidden');
                 document.getElementById('workerProfileView').classList.remove('hidden');
             };
-          
+            container.appendChild(
