@@ -2,362 +2,515 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#2563eb">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>حاسبة الرواتب - محمد المرعي</title>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4f46e5">
+    <title>سجل العمال والرواتب - محمد المرعي</title>
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', Tahoma, Arial, sans-serif; }
 
         body {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 12px;
+            color: #1e293b;
         }
 
         .app {
             background: #ffffff;
-            padding: 25px;
-            border-radius: 20px;
+            padding: 20px;
+            border-radius: 24px;
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            max-width: 460px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
         }
 
         h2 {
-            text-align: center;
-            color: #1e3c72;
-            margin-bottom: 20px;
+            color: #312e81;
             font-size: 22px;
+            font-weight: 800;
+        }
+
+        .developer-tag {
+            font-size: 12px;
+            color: #6366f1;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            width: 100%;
+            margin-bottom: 12px;
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .worker-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            padding: 12px 14px;
+            border-radius: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .worker-card:hover {
+            border-color: #6366f1;
+            background: #fff;
+        }
+
+        .worker-info span {
+            display: block;
+        }
+
+        .worker-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .worker-salary {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            margin-top: 2px;
         }
 
         .input-group {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         label {
             display: block;
             margin-bottom: 4px;
-            color: #444;
-            font-size: 14px;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 13px;
+            outline: none;
+            background: #f8fafc;
+            color: #0f172a;
             font-weight: 600;
         }
 
-        input {
-            width: 100%;
-            padding: 11px;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s ease;
-            background: #f9fafb;
-        }
-
-        input:focus {
-            border-color: #2563eb;
+        input:focus, select:focus {
+            border-color: #6366f1;
             background: #fff;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
-        .dynamic-fields-container {
-            margin-top: 5px;
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .dynamic-input {
-            padding: 7px 10px;
-            font-size: 13px;
-            border: 1px dashed #9ca3af;
-            border-radius: 8px;
-            background: #f3f4f6;
-            width: 100%;
-        }
-
-        .results {
-            margin-top: 20px;
-            background: #f3f4f6;
-            padding: 15px;
+        .day-record-box {
+            background: #f1f5f9;
+            border: 1.5px solid #cbd5e1;
+            padding: 10px;
             border-radius: 12px;
-            border: 1px solid #e5e7eb;
-            display: none;
+            margin-bottom: 8px;
+            font-size: 12px;
         }
 
-        .result-item {
+        .day-record-header {
+            font-weight: 800;
+            color: #312e81;
             display: flex;
             justify-content: space-between;
-            padding: 7px 0;
-            font-size: 13px;
-            color: #374151;
-            border-bottom: 1px dashed #d1d5db;
+            margin-bottom: 4px;
         }
 
-        .result-item:last-child {
-            border-bottom: none;
-        }
-
-        .result-item span:nth-child(2) {
-            font-weight: bold;
-            color: #1f2937;
-        }
-
-        .sub-details {
-            font-size: 11px;
-            color: #6b7280;
-            margin-top: 2px;
-        }
-
-        .final-result {
-            background: #2563eb;
+        .summary-box {
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
             color: white;
             padding: 14px;
-            margin-top: 15px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 16px;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+            border-radius: 14px;
+            margin-top: 14px;
+            text-align: center;
         }
 
-        .buttons-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
+        .summary-box div {
+            margin-bottom: 4px;
+            font-size: 13px;
+            font-weight: 700;
         }
 
-        .btn-action {
-            flex: 1;
-            padding: 12px;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        .summary-total {
+            font-size: 18px !important;
+            font-weight: 800 !important;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 6px;
+            margin-top: 6px;
         }
 
-        .btn-download {
-            background: #059669;
-        }
-        .btn-download:hover {
-            background: #047857;
-        }
-
-        .btn-share {
-            background: #2563eb;
-        }
-        .btn-share:hover {
-            background: #1d4ed8;
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
 
 <body>
+
 <div class="app">
-    <!-- المدخلات بالأول -->
-    <div id="inputFormArea">
+    <div class="app-header">
+        <h2>سجل العمال والرواتب</h2>
+        <div class="developer-tag">إعداد: محمد المرعي</div>
+    </div>
+
+    <!-- واجهة قائمة العمال الرئيسية -->
+    <div id="mainHomeView">
+        <div class="section-title">
+            <span>قائمة العمال (10 عمال كحد أقصى أو أكثر)</span>
+        </div>
+        <button class="btn-primary" onclick="openAddWorkerModal()">➕ إضافة عامل جديد</button>
+        <div id="workersListContainer" style="max-height: 380px; overflow-y: auto; margin-top: 8px;"></div>
+    </div>
+
+    <!-- واجهة ملف العامل الشخصي واليوميات -->
+    <div id="workerProfileView" class="hidden">
+        <button class="btn-secondary" onclick="backToHome()">⬅ العودة لقائمة العمال</button>
+        
+        <div style="margin-top: 12px; background: #e0e7ff; padding: 10px; border-radius: 12px; text-align: center;">
+            <div id="profileWorkerName" style="font-size: 16px; font-weight: 800; color: #312e81;"></div>
+            <div id="profileWorkerSalary" style="font-size: 12px; color: #4338ca; font-weight: 700;"></div>
+        </div>
+
+        <div style="margin-top: 12px; border-top: 2px solid #f1f5f9; padding-top: 10px;">
+            <div class="section-title">تسجيل يومية العامل</div>
+            
+            <div class="input-group">
+                <label>تاريخ اليوم</label>
+                <input type="date" id="recordDate">
+            </div>
+
+            <div class="input-group">
+                <label>حالة الدوام</label>
+                <select id="recordStatus" onchange="toggleRecordFields()">
+                    <option value="present">داوم (كامل)</option>
+                    <option value="absent">غائب</option>
+                </select>
+            </div>
+
+            <div id="extraFieldsContainer">
+                <div class="input-group">
+                    <label>ساعات الإضافي (ساعة بساعة ونصف)</label>
+                    <input type="number" id="recordOvertime" placeholder="عدد الساعات (مثال: 2)" value="0">
+                </div>
+                <div class="input-group">
+                    <label>ساعات الإضافي (ساعة بساعتين)</label>
+                    <input type="number" id="recordOvertimeDouble" placeholder="عدد الساعات" value="0">
+                </div>
+                <div class="input-group">
+                    <label>ساعات التأخير</label>
+                    <input type="number" id="recordDelay" placeholder="عدد ساعات التأخير" value="0">
+                </div>
+                <div class="input-group">
+                    <label>مبلغ مسحوب (سلفية)</label>
+                    <input type="number" id="recordWithdrawn" placeholder="المبلغ" value="0">
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="saveDayRecord()">💾 حفظ حركة هذا اليوم</button>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <div class="section-title">سجل الأيام المسجلة لهذا العامل</div>
+            <div id="workerDaysList" style="max-height: 180px; overflow-y: auto;"></div>
+        </div>
+
+        <div class="summary-box" id="workerFinancialSummary"></div>
+    </div>
+</div>
+
+<!-- نافذة إضافة عامل جديد -->
+<div id="addWorkerModal" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; padding: 20px;">
+    <div style="background:white; padding:20px; border-radius:20px; width:100%; max-width:380px;">
+        <div class="section-title">إضافة عامل جديد</div>
         <div class="input-group">
             <label>اسم العامل</label>
-            <input id="employeeName" placeholder="أدخل اسم العامل" oninput="calculate()">
+            <input type="text" id="newWorkerName" placeholder="أدخل اسم العامل">
         </div>
         <div class="input-group">
-            <label>الراتب الأساسي</label>
-            <input id="salary" type="number" placeholder="أدخل الراتب" oninput="calculate()">
+            <label>الراتب الشهري الأساسي</label>
+            <input type="number" id="newWorkerSalary" placeholder="أدخل الراتب الشهري">
         </div>
-        <div class="input-group">
-            <label>أيام الدوام</label>
-            <input id="workDays" type="number" placeholder="عدد أيام الدوام" oninput="calculate()">
-        </div>
-        <div class="input-group">
-            <label>إضافي ساعة بساعة ونصف</label>
-            <input id="overtime" type="number" placeholder="عدد الساعات" oninput="calculate()">
-        </div>
-        <div class="input-group">
-            <label>إضافي ساعة بساعتين</label>
-            <input id="overtimeDouble" type="number" placeholder="عدد الساعات" oninput="calculate()">
-        </div>
-        <div class="input-group">
-            <label>التأخير (بالساعات)</label>
-            <input id="delay" type="number" placeholder="عدد الساعات" oninput="updateDynamicInputs(); calculate();">
-            <div id="delayDates" class="dynamic-fields-container"></div>
-        </div>
-        <div class="input-group">
-            <label>الغياب (بالأيام)</label>
-            <input id="absence" type="number" placeholder="عدد الأيام" oninput="updateDynamicInputs(); calculate();">
-            <div id="absenceDates" class="dynamic-fields-container"></div>
-        </div>
-        <div class="input-group">
-            <label>ساحب</label>
-            <input id="withdrawn" type="number" placeholder="المبلغ المسحوب" oninput="calculate()">
-        </div>
-    </div>
-
-    <!-- قسم النتائج والصورة تحت -->
-    <div id="captureArea" style="background: #ffffff; padding: 15px; border-radius: 12px; margin-top: 15px; display: none;">
-        <h2 style="font-size: 18px; margin-bottom: 12px; text-align: center; color: #1e3c72;">نتيجة حساب الراتب</h2>
-        <div class="results" id="resultsContent" style="display: block; margin-top: 0; border: none; background: transparent; padding: 0;"></div>
-    </div>
-
-    <div class="buttons-container">
-        <button class="btn-action btn-download" onclick="downloadImage()">حفظ صورة</button>
-        <button class="btn-action btn-share" onclick="shareImage()">مشاركة عبر التطبيقات</button>
+        <button class="btn-primary" onclick="addNewWorker()">حفظ العامل</button>
+        <button class="btn-secondary" onclick="closeAddWorkerModal()" style="width:100%; margin-top:4px;">إلغاء</button>
     </div>
 </div>
 
 <script>
-function updateDynamicInputs() {
-    renderSubInputs('delay', 'delayDates', 'تاريخ/ساعة التأخير');
-    renderSubInputs('absence', 'absenceDates', 'تاريخ الغياب');
+let workers = JSON.parse(localStorage.getItem('my_workers_data')) || [];
+let activeWorkerId = null;
+
+// ضبط تاريخ اليوم افتراضياً
+document.getElementById('recordDate').valueAsDate = new Date();
+
+function saveData() {
+    localStorage.setItem('my_workers_data', JSON.stringify(workers));
 }
 
-function renderSubInputs(countId, containerId, placeholderText) {
-    const count = parseInt(document.getElementById(countId).value) || 0;
-    const container = document.getElementById(containerId);
-    
-    const existingValues = [];
-    container.querySelectorAll('input').forEach(input => existingValues.push(input.value));
-
+function renderWorkersList() {
+    const container = document.getElementById('workersListContainer');
     container.innerHTML = '';
-    for (let i = 0; i < count; i++) {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'dynamic-input';
-        input.placeholder = `${placeholderText} ${i + 1}`;
-        input.value = existingValues[i] || '';
-        input.oninput = calculate;
-        container.appendChild(input);
-    }
-}
-
-function getSubValues(containerId) {
-    const container = document.getElementById(containerId);
-    const values = [];
-    container.querySelectorAll('input').forEach(input => {
-        if (input.value.trim() !== '') values.push(input.value.trim());
-    });
-    return values;
-}
-
-function calculate() {
-    const employeeName = document.getElementById('employeeName').value.trim();
-    const salary = parseFloat(document.getElementById('salary').value) || 0;
-    const workDays = parseFloat(document.getElementById('workDays').value) || 0;
-    const overtime = parseFloat(document.getElementById('overtime').value) || 0;
-    const overtimeDouble = parseFloat(document.getElementById('overtimeDouble').value) || 0;
-    const delay = parseFloat(document.getElementById('delay').value) || 0;
-    const absence = parseFloat(document.getElementById('absence').value) || 0;
-    const withdrawn = parseFloat(document.getElementById('withdrawn').value) || 0;
-
-    const resultsBox = document.getElementById('resultsContent');
-    const captureArea = document.getElementById('captureArea');
-
-    if (salary === 0 && workDays === 0) {
-        captureArea.style.display = 'none';
+    
+    if (workers.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:13px; padding:20px;">لا يوجد عمال مضافين حالياً. اضغط على زر إضافة عامل جديد.</div>';
         return;
     }
 
-    captureArea.style.display = 'block';
+    workers.forEach((worker, index) => {
+        const card = document.createElement('div');
+        card.className = 'worker-card';
+        card.innerHTML = `
+            <div class="worker-info" onclick="openWorkerProfile(${index})">
+                <span class="worker-name">👤 ${worker.name}</span>
+                <span class="worker-salary">الراتب: ${worker.salary} ليرة</span>
+            </div>
+            <div>
+                <button class="btn-danger" onclick="deleteWorker(event, ${index})">حذف</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
 
-    const daily = salary / 30;
-    const hourly = daily / 9;
-    
-    const rate15 = hourly * 1.5;
-    const rate2 = hourly * 2;
+function openAddWorkerModal() {
+    document.getElementById('newWorkerName').value = '';
+    document.getElementById('newWorkerSalary').value = '';
+    document.getElementById('addWorkerModal').classList.remove('hidden');
+}
 
-    const totalWorkDaysAmount = daily * workDays;
-    const totalOvertime15 = overtime * rate15;
-    const totalOvertime2 = overtimeDouble * rate2;
-    const totalDelayCut = delay * hourly;
-    const totalAbsenceCut = absence * daily;
+function closeAddWorkerModal() {
+    document.getElementById('addWorkerModal').classList.add('hidden');
+}
 
-    const netTotal = totalWorkDaysAmount + totalOvertime15 + totalOvertime2 - totalDelayCut - totalAbsenceCut - withdrawn;
+function addNewWorker() {
+    const name = document.getElementById('newWorkerName').value.trim();
+    const salary = parseFloat(document.getElementById('newWorkerSalary').value) || 0;
 
-    const delayDates = getSubValues('delayDates');
-    const absenceDates = getSubValues('absenceDates');
-
-    let htmlContent = '';
-    if (employeeName !== '') {
-        htmlContent += `<div class="result-item" style="font-weight:bold; color:#2563eb; font-size:14px; margin-bottom:5px;"><span>اسم العامل:</span><span>${employeeName}</span></div>`;
+    if (!name || salary <= 0) {
+        alert('الرجاء إدخال اسم العامل والراتب الصحيح');
+        return;
     }
 
-    htmlContent += `
-        <div class="result-item"><span>أيام الدوام (${workDays} يوم × ${daily.toFixed(2)}):</span><span>${totalWorkDaysAmount.toFixed(2)} ليرة</span></div>
-        <div class="result-item"><span>إضافي ساعة بساعة ونصف (${overtime} ساعة × ${rate15.toFixed(2)}):</span><span>+ ${totalOvertime15.toFixed(2)} ليرة</span></div>
-        <div class="result-item"><span>إضافي ساعة بساعتين (${overtimeDouble} ساعة × ${rate2.toFixed(2)}):</span><span>+ ${totalOvertime2.toFixed(2)} ليرة</span></div>
-        
-        <div class="result-item" style="flex-direction: column; align-items: flex-start;">
-            <div style="display: flex; justify-content: space-between; width: 100%;">
-                <span>التأخير (${delay} ساعة × ${hourly.toFixed(2)}):</span>
-                <span>- ${totalDelayCut.toFixed(2)} ليرة</span>
-            </div>
-            ${delayDates.length > 0 ? `<div class="sub-details">التواريخ: ${delayDates.join(' ، ')}</div>` : ''}
-        </div>
+    workers.push({
+        name: name,
+        salary: salary,
+        records: [] // تخزين الحركات اليومية
+    });
 
-        <div class="result-item" style="flex-direction: column; align-items: flex-start;">
-            <div style="display: flex; justify-content: space-between; width: 100%;">
-                <span>الغياب (${absence} يوم × ${daily.toFixed(2)}):</span>
-                <span>- ${totalAbsenceCut.toFixed(2)} ليرة</span>
-            </div>
-            ${absenceDates.length > 0 ? `<div class="sub-details">التواريخ: ${absenceDates.join(' ، ')}</div>` : ''}
-        </div>
+    saveData();
+    closeAddWorkerModal();
+    renderWorkersList();
+}
 
-        <div class="result-item"><span>ساحب:</span><span>- ${withdrawn.toFixed(2)} ليرة</span></div>
+function deleteWorker(event, index) {
+    event.stopPropagation();
+    if (confirm('هل أنت متأكد من حذف هذا العامل وكل سجله؟')) {
+        workers.splice(index, 1);
+        saveData();
+        renderWorkersList();
+    }
+}
+
+function openWorkerProfile(index) {
+    activeWorkerId = index;
+    const worker = workers[index];
+    
+    document.getElementById('profileWorkerName').innerText = worker.name;
+    document.getElementById('profileWorkerSalary').innerText = `الراتب الشهري: ${worker.salary} ليرة`;
+    
+    document.getElementById('mainHomeView').classList.add('hidden');
+    document.getElementById('workerProfileView').classList.remove('hidden');
+    
+    renderWorkerDays();
+}
+
+function backToHome() {
+    activeWorkerId = null;
+    document.getElementById('workerProfileView').classList.add('hidden');
+    document.getElementById('mainHomeView').classList.remove('hidden');
+    renderWorkersList();
+}
+
+function toggleRecordFields() {
+    const status = document.getElementById('recordStatus').value;
+    const extraFields = document.getElementById('extraFieldsContainer');
+    if (status === 'absent') {
+        extraFields.classList.add('hidden');
+    } else {
+        extraFields.classList.remove('hidden');
+    }
+}
+
+function saveDayRecord() {
+    const date = document.getElementById('recordDate').value;
+    const status = document.getElementById('recordStatus').value;
+    
+    if (!date) {
+        alert('الرجاء اختيار التاريخ');
+        return;
+    }
+
+    const overtime = parseFloat(document.getElementById('recordOvertime').value) || 0;
+    const overtimeDouble = parseFloat(document.getElementById('recordOvertimeDouble').value) || 0;
+    const delay = parseFloat(document.getElementById('recordDelay').value) || 0;
+    const withdrawn = parseFloat(document.getElementById('recordWithdrawn').value) || 0;
+
+    const worker = workers[activeWorkerId];
+    
+    // إزالة أي سجل قديم بنفس التاريخ ليتم تحديثه
+    worker.records = worker.records.filter(r => r.date !== date);
+
+    worker.records.push({
+        date: date,
+        status: status,
+        overtime: overtime,
+        overtimeDouble: overtimeDouble,
+        delay: delay,
+        withdrawn: withdrawn
+    });
+
+    // ترتيب السجلات حسب التواريخ تنازلياً
+    worker.records.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    saveData();
+    renderWorkerDays();
+    alert('✅ تم حفظ حركة اليوم بنجاح');
+}
+
+function deleteDayRecord(date) {
+    const worker = workers[activeWorkerId];
+    worker.records = worker.records.filter(r => r.date !== date);
+    saveData();
+    renderWorkerDays();
+}
+
+function renderWorkerDays() {
+    const worker = workers[activeWorkerId];
+    const container = document.getElementById('workerDaysList');
+    container.innerHTML = '';
+
+    if (worker.records.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; padding:10px;">لم يتم تسجيل أي يوم لهذا العامل بعد.</div>';
+        document.getElementById('workerFinancialSummary').innerHTML = '<div>لا توجد بيانات حسابية بعد</div>';
+        return;
+    }
+
+    let totalWorkDaysCount = 0;
+    let totalAbsenceCount = 0;
+    let totalOvertimeHours15 = 0;
+    let totalOvertimeHours2 = 0;
+    let totalDelayHours = 0;
+    let totalWithdrawnAmount = 0;
+
+    const dailyRate = worker.salary / 30;
+    const hourlyRate = dailyRate / 9;
+
+    worker.records.forEach(rec => {
+        if (rec.status === 'present') totalWorkDaysCount++;
+        if (rec.status === 'absent') totalAbsenceCount++;
+        totalOvertimeHours15 += rec.overtime;
+        totalOvertimeHours2 += rec.overtimeDouble;
+        totalDelayHours += rec.delay;
+        totalWithdrawnAmount += rec.withdrawn;
+
+        const box = document.createElement('div');
+        box.className = 'day-record-box';
         
-        <div class="final-result">
-            <span>الناتج</span>
-            <span>${netTotal.toFixed(2)} ليرة</span>
-        </div>
+        let detailsText = rec.status === 'present' ? '🟢 دوام كامل' : '🔴 غياب';
+        if (rec.overtime > 0) detailsText += ` | إضافي 1.5x: ${rec.overtime}س`;
+        if (rec.overtimeDouble > 0) detailsText += ` | إضافي 2x: ${rec.overtimeDouble}س`;
+        if (rec.delay > 0) detailsText += ` | تأخير: ${rec.delay}س`;
+        if (rec.withdrawn > 0) detailsText += ` | سحب: ${rec.withdrawn}`;
+
+        box.innerHTML = `
+            <div class="day-record-header">
+                <span>📅 ${rec.date}</span>
+                <span style="cursor:pointer; color:#dc2626;" onclick="deleteDayRecord('${rec.date}')">حذف</span>
+            </div>
+            <div>${detailsText}</div>
+        `;
+        container.appendChild(box);
+    });
+
+    // حساب الصافي النهائي
+    const amountWorkDays = totalWorkDaysCount * dailyRate;
+    const amountOvertime15 = totalOvertimeHours15 * hourlyRate * 1.5;
+    const amountOvertime2 = totalOvertimeHours2 * hourlyRate * 2;
+    const amountDelayCut = totalDelayHours * hourlyRate;
+    
+    const netSalary = amountWorkDays + amountOvertime15 + amountOvertime2 - amountDelayCut - totalWithdrawnAmount;
+
+    document.getElementById('workerFinancialSummary').innerHTML = `
+        <div>عدد أيام الدوام: ${totalWorkDaysCount} يوم (${amountWorkDays.toFixed(1)} ليرة)</div>
+        <div>الإضافي والتأخير: +${(amountOvertime15+amountOvertime2).toFixed(1)} / -${amountDelayCut.toFixed(1)} ليرة</div>
+        <div>المبلغ المسحوب (سلف): ${totalWithdrawnAmount} ليرة</div>
+        <div class="summary-total">الصافي المستحق: ${netSalary.toFixed(2)} ليرة</div>
     `;
-
-    resultsBox.innerHTML = htmlContent;
 }
 
-function downloadImage() {
-    html2canvas(document.querySelector("#captureArea")).then(canvas => {
-        let link = document.createElement('a');
-        link.download = 'salary-report.png';
-        link.href = canvas.toDataURL();
-        link.click();
-    });
-}
-
-function shareImage() {
-    const employeeName = document.getElementById('employeeName').value.trim() || 'عامل';
-    const netTotalElem = document.querySelector('.final-result span:last-child');
-    const netTotalText = netTotalElem ? netTotalElem.innerText : '0';
-
-    html2canvas(document.querySelector("#captureArea")).then(canvas => {
-        canvas.toBlob(blob => {
-            const file = new File([blob], "salary-report.png", { type: "image/png" });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                navigator.share({
-                    files: [file],
-                    title: 'حاسبة الرواتب',
-                    text: `راتب العامل: ${employeeName} - الناتج: ${netTotalText}`
-                }).catch(() => {});
-            } else {
-                alert('خاصية المشاركة المباشرة غير متوفرة في متصفحك الحالي، يمكنك استخدام زر حفظ الصورة.');
-            }
-        });
-    });
-}
+// تشغيل القائمة عند فتح التطبيق
+renderWorkersList();
 </script>
 
 </body>
