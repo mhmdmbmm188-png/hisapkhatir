@@ -2,417 +2,374 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>سجل العمال والرواتب - محمد المرعي</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل العمال والرواتب</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Tahoma, Arial, sans-serif; }
-        body { background: #0f172a; padding: 12px; color: #1e293b; min-height: 100vh; }
-        .app { background: #ffffff; padding: 15px; border-radius: 20px; width: 100%; max-width: 480px; margin: 0 auto; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); }
-        .app-header { text-align: center; margin-bottom: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
-        h2 { color: #312e81; font-size: 20px; font-weight: 800; }
-        .developer-tag { font-size: 11px; color: #6366f1; font-weight: 700; margin-top: 2px; }
-        .section-title { font-size: 14px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
-        .btn-primary { background: #4f46e5; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-bottom: 10px; }
-        .btn-secondary { background: #64748b; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; width: 100%; }
-        .btn-danger { background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; }
-        .worker-card { background: #f8fafc; border: 1.5px solid #e2e8f0; padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .worker-name { font-size: 14px; font-weight: 800; color: #0f172a; }
-        .worker-salary { font-size: 11px; color: #64748b; font-weight: 600; margin-top: 2px; }
-        .input-group { margin-bottom: 8px; }
-        label { display: block; margin-bottom: 3px; color: #334155; font-size: 11px; font-weight: 700; }
-        input, select { width: 100%; padding: 9px 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 12px; outline: none; background: #f8fafc; color: #0f172a; font-weight: 600; }
-        .day-record-box { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px; border-radius: 10px; margin-bottom: 6px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
-        .day-record-header { font-weight: 800; color: #312e81; margin-bottom: 3px; }
-        .summary-box { background: #4f46e5; color: white; padding: 12px; border-radius: 12px; margin-top: 10px; }
-        .summary-box div { margin-bottom: 3px; font-size: 12px; font-weight: 700; }
-        .summary-total { font-size: 14px !important; font-weight: 800 !important; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 5px; margin-top: 5px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; }
-        .cal-day-name { font-size: 11px; font-weight: 800; color: #64748b; text-align: center; padding-bottom: 4px; }
-        .cal-day { padding: 8px 0; background: #f1f5f9; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; color: #1e293b; }
-        .cal-day.recorded-present { background: #22c55e !important; color: white !important; }
-        .cal-day.recorded-absent { background: #dc2626 !important; color: white !important; }
-        .cal-day.recorded-weekend { background: #64748b !important; color: white !important; }
-        .cal-day.empty { background: transparent; cursor: default; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+        body { background: #0f172a; padding: 10px; color: #1e293b; }
+        .app { background: #fff; max-width: 480px; margin: 0 auto; padding: 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        h2 { text-align: center; color: #312e81; font-size: 18px; margin-bottom: 5px; }
+        .dev { text-align: center; font-size: 11px; color: #6366f1; margin-bottom: 15px; font-weight: bold; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .btn-primary { background: #4f46e5; color: #fff; }
+        .btn-secondary { background: #64748b; color: #fff; }
+        .btn-danger { background: #dc2626; color: #fff; padding: 5px 10px; font-size: 11px; border-radius: 6px; }
+        .input-group { margin-bottom: 10px; }
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #334155; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #f8fafc; }
+        .worker-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .hidden { display: none !important; }
-        #syncStatus { text-align: center; font-size: 11px; padding: 6px; border-radius: 6px; margin-top: 6px; font-weight: 700; background: #dcfce7; color: #166534; }
+        .summary { background: #4f46e5; color: #fff; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; font-weight: bold; }
+        .day-box { background: #f1f5f9; padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; }
+        .cal-day { padding: 8px 0; background: #f1f5f9; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .cal-day.present { background: #22c55e; color: #fff; }
+        .cal-day.absent { background: #dc2626; color: #fff; }
+        .cal-day.weekend { background: #64748b; color: #fff; }
     </style>
 </head>
 <body>
 
 <div class="app">
-    <div class="app-header">
-        <h2>سجل العمال والرواتب</h2>
-        <div class="developer-tag">إعداد: محمد المرعي</div>
-        <div id="syncStatus">✅ يعمل بذاكرة الهاتف المحلية</div>
+    <h2>سجل العمال والرواتب</h2>
+    <div class="dev">إعداد: محمد المرعي</div>
+
+    <!-- Home View -->
+    <div id="homeView">
+        <button class="btn btn-primary" onclick="showAddWorker()">➕ إضافة عامل جديد</button>
+        <div id="workersList"></div>
     </div>
 
-    <!-- واجهة الرئيسية -->
-    <div id="mainHomeView">
-        <div class="section-title">قائمة العمال</div>
-        <button class="btn-primary" onclick="openAddScreen()" type="button">➕ إضافة عامل جديد</button>
-        <div id="workersListContainer" style="max-height: 300px; overflow-y: auto; margin-top: 6px;"></div>
-    </div>
-
-    <!-- واجهة إضافة عامل -->
-    <div id="addWorkerView" class="hidden">
-        <button class="btn-secondary" onclick="closeAddScreen()" type="button" style="margin-bottom: 10px;">⬅ العودة للقائمة</button>
-        <div class="section-title">إضافة عامل جديد</div>
+    <!-- Add Worker View -->
+    <div id="addView" class="hidden">
+        <button class="btn btn-secondary" onclick="showHome()">⬅ رجوع</button>
         <div class="input-group">
-            <label>اسم العامل (باللغة العربية)</label>
-            <input type="text" id="newWorkerName" placeholder="أدخل اسم العامل">
+            <label>اسم العامل</label>
+            <input type="text" id="workerName" placeholder="أدخل الاسم">
         </div>
         <div class="input-group">
-            <label>الراتب الشهري الأساسي</label>
-            <input type="number" id="newWorkerSalary" placeholder="أدخل الراتب">
+            <label>الراتب الشهري</label>
+            <input type="number" id="workerSalary" placeholder="أدخل الراتب">
         </div>
-        <button class="btn-primary" onclick="saveNewWorker()" type="button" style="margin-top: 10px;">💾 حفظ العامل</button>
+        <button class="btn btn-primary" onclick="saveWorker()">💾 حفظ العامل</button>
     </div>
 
-    <!-- واجهة ملف العامل -->
-    <div id="workerProfileView" class="hidden">
-        <button class="btn-secondary" onclick="backToHome()" type="button" style="margin-bottom: 8px;">⬅ العودة للقائمة</button>
-        
-        <div style="background: #e0e7ff; padding: 8px; border-radius: 10px; text-align: center; margin-bottom: 8px;">
-            <div id="profileWorkerName" style="font-size: 14px; font-weight: 800; color: #312e81;"></div>
-            <div id="profileWorkerSalary" style="font-size: 11px; color: #4338ca; font-weight: 700;"></div>
+    <!-- Worker Profile View -->
+    <div id="profileView" class="hidden">
+        <button class="btn btn-secondary" onclick="showHome()">⬅ رجوع للقائمة</button>
+        <div style="background:#e0e7ff; padding:10px; border-radius:8px; text-align:center; margin-bottom:10px;">
+            <div id="pName" style="font-weight:bold; color:#312e81; font-size:15px;"></div>
+            <div id="pSalary" style="font-size:12px; color:#4338ca;"></div>
         </div>
 
-        <div style="border-top: 1.5px solid #f1f5f9; padding-top: 6px;">
-            <div class="section-title" style="font-size:12px;">تسجيل حركة يومية</div>
-            
+        <div class="input-group">
+            <label>التاريخ</label>
+            <input type="text" id="recDate" readonly onclick="showCal()" style="background:#fff; text-align:center; font-weight:bold; cursor:pointer;">
+        </div>
+
+        <div class="input-group">
+            <label>الحالة</label>
+            <select id="recStatus" onchange="toggleExtra()">
+                <option value="present">داوم (كامل)</option>
+                <option value="absent">غائب</option>
+                <option value="weekend">عطلة</option>
+            </select>
+        </div>
+
+        <div id="extraContainer">
             <div class="input-group">
-                <label>التاريخ (اضغط لاختيار اليوم)</label>
-                <input type="text" id="recordDateDisplay" readonly onclick="openCalendar()" style="cursor: pointer; background: #fff; text-align: center; font-weight: 800; color: #4f46e5;">
-                <input type="hidden" id="recordDate">
+                <label>ساعات الإضافي (1.5x)</label>
+                <input type="number" id="recOT" value="0">
             </div>
-
             <div class="input-group">
-                <label>حالة الدوام</label>
-                <select id="recordStatus" onchange="onStatusChange()">
-                    <option value="present">داوم (كامل)</option>
-                    <option value="absent">غائب</option>
-                    <option value="weekend">عطلة رسمية (سبت/أحد)</option>
-                </select>
+                <label>ساعات الإضافي (2x)</label>
+                <input type="number" id="recOT2" value="0">
             </div>
-
-            <div id="extraFieldsContainer">
-                <div class="input-group">
-                    <label>ساعات الإضافي (ساعة بساعة ونصف)</label>
-                    <input type="number" id="recordOvertime" value="0">
-                </div>
-                <div class="input-group">
-                    <label>ساعات الإضافي (ساعة بساعتين)</label>
-                    <input type="number" id="recordOvertimeDouble" value="0">
-                </div>
-                <div class="input-group">
-                    <label>ساعات التأخير</label>
-                    <input type="number" id="recordDelay" value="0">
-                </div>
-                <div class="input-group">
-                    <label>مبلغ مسحوب (سلفية)</label>
-                    <input type="number" id="recordWithdrawn" value="0">
-                </div>
+            <div class="input-group">
+                <label>ساعات التأخير</label>
+                <input type="number" id="recDelay" value="0">
             </div>
-
-            <button class="btn-primary" onclick="saveDayRecord()" type="button">💾 حفظ حركة هذا اليوم</button>
+            <div class="input-group">
+                <label>مبلغ مسحوب (سلفية)</label>
+                <input type="number" id="recWithdrawn" value="0">
+            </div>
         </div>
 
-        <div style="margin-top: 4px;">
-            <div class="section-title" style="font-size:12px;">سجل الأيام المسجلة</div>
-            <div id="workerDaysList" style="max-height: 150px; overflow-y: auto;"></div>
-        </div>
+        <button class="btn btn-primary" onclick="saveRecord()">💾 حفظ الحركة</button>
 
-        <div class="summary-box" id="workerFinancialSummary"></div>
-        <button class="btn-primary" onclick="copyReport()" type="button" style="background: #10b981; margin-top: 10px;">📋 نسخ التقرير المفصل وإرساله</button>
+        <div style="margin-top:15px; font-weight:bold; font-size:13px;">السجل اليومي:</div>
+        <div id="recordsList" style="max-height:150px; overflow-y:auto; margin-top:5px;"></div>
+
+        <div class="summary" id="summaryBox"></div>
+        <button class="btn btn-primary" style="background:#10b981; margin-top:10px;" onclick="copyReport()">📋 نسخ التقرير</button>
     </div>
 
-    <!-- واجهة التقويم -->
-    <div id="calendarView" class="hidden">
-        <button class="btn-secondary" onclick="closeCalendar()" type="button" style="margin-bottom: 10px;">⬅ العودة لملف العامل</button>
-        <div style="text-align: center;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <button class="btn-secondary" onclick="changeMonth(-1)" type="button" style="width: auto; padding: 6px 12px;">▶</button>
-                <span id="calMonthYearTitle" style="font-weight: 800; color: #312e81; font-size: 14px;"></span>
-                <button class="btn-secondary" onclick="changeMonth(1)" type="button" style="width: auto; padding: 6px 12px;">◀</button>
-            </div>
-            <div class="calendar-grid">
-                <div class="cal-day-name">أحد</div>
-                <div class="cal-day-name">إثنين</div>
-                <div class="cal-day-name">ثلاثاء</div>
-                <div class="cal-day-name">أربعاء</div>
-                <div class="cal-day-name">خميس</div>
-                <div class="cal-day-name">جمعة</div>
-                <div class="cal-day-name">سبت</div>
-            </div>
-            <div id="calDaysContainer" class="calendar-grid" style="margin-top: 4px;"></div>
+    <!-- Calendar View -->
+    <div id="calView" class="hidden">
+        <button class="btn btn-secondary" onclick="hideCal()">⬅ رجوع</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <button class="btn btn-secondary" style="width:auto; padding:5px 10px;" onclick="changeMonth(-1)">▶</button>
+            <span id="calTitle" style="font-weight:bold; color:#312e81;"></span>
+            <button class="btn btn-secondary" style="width:auto; padding:5px 10px;" onclick="changeMonth(1)">◀</button>
         </div>
+        <div class="calendar-grid">
+            <div style="font-size:11px; font-weight:bold; color:#64748b;">أحد</div>
+            <div style="font-size:11px; font-weight:bold; color:#64748b;">إثنين</div>
+            <div style="font-size:11px; font-weight:bold; color:#64748b;">ثلاثاء</div>
+            <div style="font-size:11px; font-weight:bold; color:#64748b;">أربعاء</div>
+            <div style="font-size:11px; font-weight:bold; color:#64748b;">خميس</div>
+            <div style="font-size:11px; font-weight:bold; color:#64748b;">جمعة</div>
+            <div style="font-size:11px; font-weight:bold; color:#64748b;">سبت</div>
+        </div>
+        <div id="calGrid" class="calendar-grid"></div>
     </div>
 </div>
 
 <script>
-    let workers = [];
-    try {
-        workers = JSON.parse(localStorage.getItem('workers_data_local')) || [];
-    } catch(e) {
-        workers = [];
-    }
-
-    let activeWorkerId = null;
-    let calCurrentDate = new Date();
-    
-    const localOffset = new Date().getTimezoneOffset() * 60000;
-    const todayStr = new Date(Date.now() - localOffset).toISOString().split('T')[0];
+    let workers = JSON.parse(localStorage.getItem('workers_data')) || [];
+    let activeIdx = null;
+    let calDate = new Date();
+    let selectedDateStr = new Date().toISOString().split('T')[0];
 
     window.onload = function() {
-        document.getElementById('recordDate').value = todayStr;
-        document.getElementById('recordDateDisplay').value = todayStr;
-        renderWorkersList();
+        document.getElementById('recDate').value = selectedDateStr;
+        renderWorkers();
     };
 
-    function saveLocalStorage() {
-        try {
-            localStorage.setItem('workers_data_local', JSON.stringify(workers));
-        } catch(e) {
-            alert('خطأ في حفظ البيانات محلياً: ' + e.message);
-        }
+    function saveData() {
+        localStorage.setItem('workers_data', JSON.stringify(workers));
     }
 
-    function openAddScreen() {
-        document.getElementById('newWorkerName').value = '';
-        document.getElementById('newWorkerSalary').value = '';
-        document.getElementById('mainHomeView').classList.add('hidden');
-        document.getElementById('addWorkerView').classList.remove('hidden');
+    function showHome() {
+        activeIdx = null;
+        document.getElementById('addView').classList.add('hidden');
+        document.getElementById('profileView').classList.add('hidden');
+        document.getElementById('calView').classList.add('hidden');
+        document.getElementById('homeView').classList.remove('hidden');
+        renderWorkers();
     }
 
-    function closeAddScreen() {
-        document.getElementById('addWorkerView').classList.add('hidden');
-        document.getElementById('mainHomeView').classList.remove('hidden');
+    function showAddWorker() {
+        document.getElementById('workerName').value = '';
+        document.getElementById('workerSalary').value = '';
+        document.getElementById('homeView').classList.add('hidden');
+        document.getElementById('addView').classList.remove('hidden');
     }
 
-    function saveNewWorker() {
-        const nameInput = document.getElementById('newWorkerName');
-        const salaryInput = document.getElementById('newWorkerSalary');
-        
-        const name = nameInput.value.trim();
-        const salary = parseFloat(salaryInput.value) || 0;
-
+    function saveWorker() {
+        const name = document.getElementById('workerName').value.trim();
+        const salary = parseFloat(document.getElementById('workerSalary').value) || 0;
         if (!name || salary <= 0) {
-            alert('الرجاء إدخال اسم العامل بشكل صحيح وراتب أكبر من الصفر');
+            alert('الرجاء إدخال الاسم بشكل صحيح وراتب أكبر من الصفر');
             return;
         }
-
         workers.push({ name: name, salary: salary, records: [] });
-        saveLocalStorage();
-        
-        closeAddScreen();
-        renderWorkersList();
+        saveData();
+        showHome();
     }
 
-    function backToHome() {
-        activeWorkerId = null;
-        document.getElementById('workerProfileView').classList.add('hidden');
-        document.getElementById('mainHomeView').classList.remove('hidden');
-        renderWorkersList();
-    }
-
-    function openCalendar() {
-        document.getElementById('workerProfileView').classList.add('hidden');
-        document.getElementById('calendarView').classList.remove('hidden');
-        renderCustomCalendar();
-    }
-
-    function closeCalendar() {
-        document.getElementById('calendarView').classList.add('hidden');
-        document.getElementById('workerProfileView').classList.remove('hidden');
-    }
-
-    function changeMonth(direction) {
-        calCurrentDate.setMonth(calCurrentDate.getMonth() + direction);
-        renderCustomCalendar();
-    }
-
-    function onStatusChange() {
-        const status = document.getElementById('recordStatus').value;
-        const extraFields = document.getElementById('extraFieldsContainer');
-        if (status === 'absent' || status === 'weekend') {
-            extraFields.classList.add('hidden');
-        } else {
-            extraFields.classList.remove('hidden');
-        }
-    }
-
-    function saveDayRecord() {
-        const date = document.getElementById('recordDate').value;
-        const status = document.getElementById('recordStatus').value;
-        
-        if (!date) {
-            alert('الرجاء اختيار التاريخ');
+    function renderWorkers() {
+        const list = document.getElementById('workersList');
+        list.innerHTML = '';
+        if (workers.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; padding:15px;">لا يوجد عمال.</div>';
             return;
         }
+        workers.forEach((w, i) => {
+            const div = document.createElement('div');
+            div.className = 'worker-card';
+            div.innerHTML = `
+                <div style="flex-grow:1; cursor:pointer;" onclick="openProfile(${i})">
+                    <div style="font-weight:bold;">👤 ${w.name}</div>
+                    <div style="font-size:11px; color:#64748b;">الراتب: ${w.salary}</div>
+                </div>
+                <button class="btn-danger" onclick="deleteWorker(event, ${i})">حذف</button>
+            `;
+            list.appendChild(div);
+        });
+    }
 
-        if (activeWorkerId === null || !workers[activeWorkerId]) {
-            alert('الرجاء اختيار العامل مرة أخرى');
-            return;
+    function deleteWorker(e, i) {
+        e.stopPropagation();
+        if (confirm('حذف العامل؟')) {
+            workers.splice(i, 1);
+            saveData();
+            renderWorkers();
         }
+    }
 
-        const worker = workers[activeWorkerId];
-        if (!worker.records) {
-            worker.records = [];
-        }
+    function openProfile(i) {
+        activeIdx = i;
+        const w = workers[i];
+        document.getElementById('pName').innerText = w.name;
+        document.getElementById('pSalary').innerText = `الراتب الشهري: ${w.salary} | اليومية: ${(w.salary/30).toFixed(1)}`;
+        document.getElementById('homeView').classList.add('hidden');
+        document.getElementById('profileView').classList.remove('hidden');
+        renderRecords();
+    }
 
-        worker.records = worker.records.filter(r => r.date !== date);
+    function toggleExtra() {
+        const s = document.getElementById('recStatus').value;
+        const extra = document.getElementById('extraContainer');
+        if (s === 'absent' || s === 'weekend') extra.classList.add('hidden');
+        else extra.classList.remove('hidden');
+    }
 
-        worker.records.push({
+    function saveRecord() {
+        if (activeIdx === null) return;
+        const w = workers[activeIdx];
+        if (!w.records) w.records = [];
+        const date = document.getElementById('recDate').value;
+        const status = document.getElementById('recStatus').value;
+
+        w.records = w.records.filter(r => r.date !== date);
+        w.records.push({
             date: date,
             status: status,
-            overtime: status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertime').value) || 0),
-            overtimeDouble: status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertimeDouble').value) || 0),
-            delay: status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordDelay').value) || 0),
-            withdrawn: parseFloat(document.getElementById('recordWithdrawn').value) || 0
+            ot: status === 'absent' || status === 'weekend' ? 0 : parseFloat(document.getElementById('recOT').value) || 0,
+            ot2: status === 'absent' || status === 'weekend' ? 0 : parseFloat(document.getElementById('recOT2').value) || 0,
+            delay: status === 'absent' || status === 'weekend' ? 0 : parseFloat(document.getElementById('recDelay').value) || 0,
+            withdrawn: parseFloat(document.getElementById('recWithdrawn').value) || 0
         });
-
-        worker.records.sort((a, b) => new Date(b.date) - new Date(a.date));
-        saveLocalStorage();
-        renderWorkerDays();
-        alert('تم حفظ حركة اليوم بنجاح');
+        w.records.sort((a,b) => new Date(b.date) - new Date(a.date));
+        saveData();
+        renderRecords();
+        alert('تم الحفظ بنجاح');
     }
 
-    function renderWorkersList() {
-        const container = document.getElementById('workersListContainer');
-        if (!container) return;
-        container.innerHTML = '';
-        
-        if (workers.length === 0) {
-            container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; padding:15px;">لا يوجد عمال مضافين حالياً.</div>';
+    function renderRecords() {
+        const list = document.getElementById('recordsList');
+        const summary = document.getElementById('summaryBox');
+        list.innerHTML = '';
+        const w = workers[activeIdx];
+        const recs = w.records || [];
+        if (recs.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px;">لا توجد حركات.</div>';
+            summary.innerHTML = 'الصافي: 0';
             return;
         }
 
-        workers.forEach((worker, index) => {
-            const card = document.createElement('div');
-            card.className = 'worker-card';
-            card.innerHTML = `
-                <div style="flex-grow: 1; cursor: pointer;" onclick="openWorkerProfile(${index})">
-                    <span class="worker-name">👤 ${worker.name}</span>
-                    <span class="worker-salary">الراتب: ${worker.salary} ليرة</span>
-                </div>
-                <div>
-                    <button class="btn-danger" type="button" onclick="deleteWorker(event, ${index})">حذف</button>
-                </div>
+        let days = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
+        recs.forEach((r, idx) => {
+            if (r.status === 'present') days++;
+            otTot += (r.ot || 0);
+            ot2Tot += (r.ot2 || 0);
+            delayTot += (r.delay || 0);
+            withTot += (r.withdrawn || 0);
+
+            let stTxt = r.status === 'present' ? 'داوم' : (r.status === 'absent' ? 'غائب' : 'عطلة');
+            const div = document.createElement('div');
+            div.className = 'day-box';
+            div.innerHTML = `
+                <div><b>${r.date}</b> (${stTxt})</div>
+                <button class="btn-danger" onclick="deleteRec(${idx})">حذف</button>
             `;
-            container.appendChild(card);
-        });
-    }
-
-    function openWorkerProfile(index) {
-        activeWorkerId = index;
-        const worker = workers[index];
-        document.getElementById('profileWorkerName').innerText = worker.name;
-        document.getElementById('profileWorkerSalary').innerText = `الراتب الشهري: ${worker.salary} ليرة | اليومية: ${(worker.salary/30).toFixed(1)} ليرة`;
-        
-        document.getElementById('mainHomeView').classList.add('hidden');
-        document.getElementById('workerProfileView').classList.remove('hidden');
-        renderWorkerDays();
-    }
-
-    function deleteWorker(event, index) {
-        event.stopPropagation();
-        if (confirm('هل أنت متأكد من حذف هذا العامل؟')) {
-            workers.splice(index, 1);
-            saveLocalStorage();
-            renderWorkersList();
-        }
-    }
-
-    function renderWorkerDays() {
-        const container = document.getElementById('workerDaysList');
-        const summaryContainer = document.getElementById('workerFinancialSummary');
-        if (!container) return;
-        container.innerHTML = '';
-        
-        if (activeWorkerId === null || !workers[activeWorkerId]) return;
-        
-        const worker = workers[activeWorkerId];
-        const records = worker.records || [];
-        
-        if (records.length === 0) {
-            container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; padding:10px;">لا توجد حركات مسجلة.</div>';
-            summaryContainer.innerHTML = '<div>المجموع: 0 ليرة</div>';
-            return;
-        }
-
-        let totalDays = 0, totalAbsence = 0, totalOvertime = 0, totalOvertimeDouble = 0, totalDelay = 0, totalWithdrawn = 0;
-
-        records.forEach((rec, index) => {
-            let statusText = '';
-            if (rec.status === 'present') { statusText = '✅ داوم'; totalDays++; }
-            else if (rec.status === 'absent') { statusText = '❌ غائب'; totalAbsence++; }
-            else if (rec.status === 'weekend') { statusText = '🏖️ عطلة'; }
-
-            totalOvertime += (rec.overtime || 0);
-            totalOvertimeDouble += (rec.overtimeDouble || 0);
-            totalDelay += (rec.delay || 0);
-            totalWithdrawn += (rec.withdrawn || 0);
-
-            const recordDiv = document.createElement('div');
-            recordDiv.className = 'day-record-box';
-            recordDiv.innerHTML = `
-                <div>
-                    <div class="day-record-header">${rec.date} - ${statusText}</div>
-                    <div style="color:#64748b; font-size:10px;">إضافي: ${rec.overtime} | إضافي 2x: ${rec.overtimeDouble} | تأخير: ${rec.delay} | سحب: ${rec.withdrawn}</div>
-                </div>
-                <button class="btn-danger" type="button" onclick="deleteRecord(${index})">حذف</button>
-            `;
-            container.appendChild(recordDiv);
+            list.appendChild(div);
         });
 
-        const daily = worker.salary / 30;
-        const hourly = daily / 9; 
-        
-        const earnedFromDays = totalDays * daily;
-        const earnedFromOvertime = (totalOvertime * hourly * 1.5) + (totalOvertimeDouble * hourly * 2);
-        const cutFromDelay = totalDelay * hourly;
-        const netTotal = earnedFromDays + earnedFromOvertime - cutFromDelay - totalWithdrawn;
+        const daily = w.salary / 30;
+        const hourly = daily / 9;
+        const earned = days * daily;
+        const otEarn = (otTot * hourly * 1.5) + (ot2Tot * hourly * 2);
+        const delayCut = delayTot * hourly;
+        const net = earned + otEarn - delayCut - withTot;
 
-        summaryContainer.innerHTML = `
-            <div>أيام الدوام: ${totalDays} يوم (${earnedFromDays.toFixed(1)} ليرة)</div>
-            <div>مكافأة الإضافي: +${earnedFromOvertime.toFixed(1)} ليرة</div>
-            <div>خصم التأخير: -${cutFromDelay.toFixed(1)} ليرة</div>
-            <div>المسحوبات: -${totalWithdrawn.toFixed(1)} ليرة</div>
-            <div class="summary-total">الصافي المستحق: ${netTotal.toFixed(1)} ليرة</div>
-        `;
+        summary.innerHTML = `أيام الدوام: ${days} | الإضافي: +${otEarn.toFixed(1)} | التأخير: -${delayCut.toFixed(1)} | السلف: -${withTot.toFixed(1)}<br>الصافي النهائي: ${net.toFixed(1)} ليرة`;
     }
 
-    function deleteRecord(recordIndex) {
-        if (confirm('هل أنت متأكد من حذف حركة هذا اليوم؟')) {
-            workers[activeWorkerId].records.splice(recordIndex, 1);
-            saveLocalStorage();
-            renderWorkerDays();
+    function deleteRec(idx) {
+        workers[activeIdx].records.splice(idx, 1);
+        saveData();
+        renderRecords();
+    }
+
+    function showCal() {
+        document.getElementById('profileView').classList.add('hidden');
+        document.getElementById('calView').classList.remove('hidden');
+        renderCalendar();
+    }
+
+    function hideCal() {
+        document.getElementById('calView').classList.add('hidden');
+        document.getElementById('profileView').classList.remove('hidden');
+    }
+
+    function changeMonth(dir) {
+        calDate.setMonth(calDate.getMonth() + dir);
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        const y = calDate.getFullYear();
+        const m = calDate.getMonth();
+        const mNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+        document.getElementById('calTitle').innerText = `${mNames[m]} ${y}`;
+
+        const firstDay = new Date(y, m, 1).getDay();
+        const totalDays = new Date(y, m + 1, 0).getDate();
+        const grid = document.getElementById('calGrid');
+        grid.innerHTML = '';
+
+        const recsMap = {};
+        if (workers[activeIdx].records) {
+            workers[activeIdx].records.forEach(r => recsMap[r.date] = r.status);
+        }
+
+        for (let i = 0; i < firstDay; i++) {
+            const empty = document.createElement('div');
+            grid.appendChild(empty);
+        }
+
+        for (let d = 1; d <= totalDays; d++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'cal-day';
+            dayDiv.innerText = d;
+            const mStr = String(m + 1).padStart(2, '0');
+            const dStr = String(d).padStart(2, '0');
+            const dKey = `${y}-${mStr}-${dStr}`;
+
+            if (recsMap[dKey]) {
+                dayDiv.classList.add(recsMap[dKey]);
+            }
+
+            dayDiv.onclick = function() {
+                selectedDateStr = dKey;
+                document.getElementById('recDate').value = dKey;
+                document.getElementById('recStatus').value = 'present';
+                document.getElementById('recOT').value = '0';
+                document.getElementById('recOT2').value = '0';
+                document.getElementById('recDelay').value = '0';
+                document.getElementById('recWithdrawn').value = '0';
+                toggleExtra();
+                hideCal();
+            };
+            grid.appendChild(dayDiv);
         }
     }
 
     function copyReport() {
-        if (activeWorkerId === null || !workers[activeWorkerId]) return;
-        
-        const worker = workers[activeWorkerId];
-        const records = worker.records || [];
-        
-        const daily = worker.salary / 30;
+        if (activeIdx === null) return;
+        const w = workers[activeIdx];
+        const recs = w.records || [];
+        let days = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
+        recs.forEach(r => {
+            if (r.status === 'present') days++;
+            otTot += (r.ot || 0);
+            ot2Tot += (r.ot2 || 0);
+            delayTot += (r.delay || 0);
+            withTot += (r.withdrawn || 0);
+        });
+        const daily = w.salary / 30;
         const hourly = daily / 9;
-        
-        let totalDays = 0, totalAbsence = 0, totalOvertime = 0, totalOvertimeDouble = 0, totalDelay = 0, totalWithdrawn = 0;
-        let absentDates = [], withdrawnDetails = [], overtimeDetails = [];
-        
-        records.forEach(rec => {
-            if (rec.status === 'present') totalDays++;
-            else if (rec.status === 'absent') {
-                totalAbsence++;
-                absentDates.push(rec.date);
-            }
-            
-            totalOvertime += (rec.overtime || 0);
-            totalOvertimeDouble += (rec.overtimeDouble || 0);
-            totalDelay += (rec.delay || 0);
-            totalWithdrawn += (rec.withdrawn || 0);
-            
-            if (rec.withdrawn > 0) withdrawnDetails.push(`${rec.date} (سح
+        const net = (days * daily) + (otTot * hourly * 1.5) + (ot2Tot * hourly * 2) - (delayTot * hourly) - withTot;
+
+        const text = `كشف حساب: ${w.name}\nالراتب الأساسي: ${w.salary}\nأيام الدوام: ${days}\nالصافي المستحق: ${net.toFixed(1)} ليرة`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => alert('تم النسخ'));
+        } else {
+            alert(text);
+        }
+    }
+</script>
+</body>
+</html>
