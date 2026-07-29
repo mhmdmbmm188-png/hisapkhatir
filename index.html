@@ -44,19 +44,19 @@
     <div class="app-header">
         <h2>سجل العمال والرواتب</h2>
         <div class="developer-tag">إعداد: محمد المرعي</div>
-        <div id="syncStatus">✅ يعمل بذاكرة الهاتف المحلية (بدون مشاكل)</div>
+        <div id="syncStatus">✅ يعمل بذاكرة الهاتف المحلية</div>
     </div>
 
     <!-- واجهة الرئيسية -->
     <div id="mainHomeView">
         <div class="section-title">قائمة العمال</div>
-        <button class="btn-primary" id="openAddBtn" type="button">➕ إضافة عامل جديد</button>
+        <button class="btn-primary" onclick="openAddScreen()" type="button">➕ إضافة عامل جديد</button>
         <div id="workersListContainer" style="max-height: 300px; overflow-y: auto; margin-top: 6px;"></div>
     </div>
 
     <!-- واجهة إضافة عامل -->
     <div id="addWorkerView" class="hidden">
-        <button class="btn-secondary" id="closeAddBtn" type="button" style="margin-bottom: 10px;">⬅ العودة للقائمة</button>
+        <button class="btn-secondary" onclick="closeAddScreen()" type="button" style="margin-bottom: 10px;">⬅ العودة للقائمة</button>
         <div class="section-title">إضافة عامل جديد</div>
         <div class="input-group">
             <label>اسم العامل (باللغة العربية)</label>
@@ -66,12 +66,12 @@
             <label>الراتب الشهري الأساسي</label>
             <input type="number" id="newWorkerSalary" placeholder="أدخل الراتب">
         </div>
-        <button class="btn-primary" id="saveWorkerBtn" type="button" style="margin-top: 10px;">💾 حفظ العامل</button>
+        <button class="btn-primary" onclick="saveNewWorker()" type="button" style="margin-top: 10px;">💾 حفظ العامل</button>
     </div>
 
     <!-- واجهة ملف العامل -->
     <div id="workerProfileView" class="hidden">
-        <button class="btn-secondary" id="backToHomeBtn" type="button" style="margin-bottom: 8px;">⬅ العودة للقائمة</button>
+        <button class="btn-secondary" onclick="backToHome()" type="button" style="margin-bottom: 8px;">⬅ العودة للقائمة</button>
         
         <div style="background: #e0e7ff; padding: 8px; border-radius: 10px; text-align: center; margin-bottom: 8px;">
             <div id="profileWorkerName" style="font-size: 14px; font-weight: 800; color: #312e81;"></div>
@@ -83,13 +83,13 @@
             
             <div class="input-group">
                 <label>التاريخ (اضغط لاختيار اليوم)</label>
-                <input type="text" id="recordDateDisplay" readonly style="cursor: pointer; background: #fff; text-align: center; font-weight: 800; color: #4f46e5;">
+                <input type="text" id="recordDateDisplay" readonly onclick="openCalendar()" style="cursor: pointer; background: #fff; text-align: center; font-weight: 800; color: #4f46e5;">
                 <input type="hidden" id="recordDate">
             </div>
 
             <div class="input-group">
                 <label>حالة الدوام</label>
-                <select id="recordStatus">
+                <select id="recordStatus" onchange="onStatusChange()">
                     <option value="present">داوم (كامل)</option>
                     <option value="absent">غائب</option>
                     <option value="weekend">عطلة رسمية (سبت/أحد)</option>
@@ -115,7 +115,7 @@
                 </div>
             </div>
 
-            <button class="btn-primary" id="saveRecordBtn" type="button">💾 حفظ حركة هذا اليوم</button>
+            <button class="btn-primary" onclick="saveDayRecord()" type="button">💾 حفظ حركة هذا اليوم</button>
         </div>
 
         <div style="margin-top: 4px;">
@@ -124,17 +124,17 @@
         </div>
 
         <div class="summary-box" id="workerFinancialSummary"></div>
-        <button class="btn-primary" id="copyReportBtn" type="button" style="background: #10b981; margin-top: 10px;">📋 نسخ التقرير المفصل وإرساله</button>
+        <button class="btn-primary" onclick="copyReport()" type="button" style="background: #10b981; margin-top: 10px;">📋 نسخ التقرير المفصل وإرساله</button>
     </div>
 
     <!-- واجهة التقويم -->
     <div id="calendarView" class="hidden">
-        <button class="btn-secondary" id="closeCalBtn" type="button" style="margin-bottom: 10px;">⬅ العودة لملف العامل</button>
+        <button class="btn-secondary" onclick="closeCalendar()" type="button" style="margin-bottom: 10px;">⬅ العودة لملف العامل</button>
         <div style="text-align: center;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <button class="btn-secondary" id="prevMonthBtn" type="button" style="width: auto; padding: 6px 12px;">▶</button>
+                <button class="btn-secondary" onclick="changeMonth(-1)" type="button" style="width: auto; padding: 6px 12px;">▶</button>
                 <span id="calMonthYearTitle" style="font-weight: 800; color: #312e81; font-size: 14px;"></span>
-                <button class="btn-secondary" id="nextMonthBtn" type="button" style="width: auto; padding: 6px 12px;">◀</button>
+                <button class="btn-secondary" onclick="changeMonth(1)" type="button" style="width: auto; padding: 6px 12px;">◀</button>
             </div>
             <div class="calendar-grid">
                 <div class="cal-day-name">أحد</div>
@@ -151,37 +151,51 @@
 </div>
 
 <script>
-    let workers = JSON.parse(localStorage.getItem('workers_data_local')) || [];
+    let workers = [];
+    try {
+        workers = JSON.parse(localStorage.getItem('workers_data_local')) || [];
+    } catch(e) {
+        workers = [];
+    }
+
     let activeWorkerId = null;
     let calCurrentDate = new Date();
     
     const localOffset = new Date().getTimezoneOffset() * 60000;
     const todayStr = new Date(Date.now() - localOffset).toISOString().split('T')[0];
 
-    document.getElementById('recordDate').value = todayStr;
-    document.getElementById('recordDateDisplay').value = todayStr;
+    window.onload = function() {
+        document.getElementById('recordDate').value = todayStr;
+        document.getElementById('recordDateDisplay').value = todayStr;
+        renderWorkersList();
+    };
 
     function saveLocalStorage() {
-        localStorage.setItem('workers_data_local', JSON.stringify(workers));
+        try {
+            localStorage.setItem('workers_data_local', JSON.stringify(workers));
+        } catch(e) {
+            alert('خطأ في حفظ البيانات محلياً: ' + e.message);
+        }
     }
 
-    renderWorkersList();
-
-    document.getElementById('openAddBtn').addEventListener('click', function() {
+    function openAddScreen() {
         document.getElementById('newWorkerName').value = '';
         document.getElementById('newWorkerSalary').value = '';
         document.getElementById('mainHomeView').classList.add('hidden');
         document.getElementById('addWorkerView').classList.remove('hidden');
-    });
+    }
 
-    document.getElementById('closeAddBtn').addEventListener('click', function() {
+    function closeAddScreen() {
         document.getElementById('addWorkerView').classList.add('hidden');
         document.getElementById('mainHomeView').classList.remove('hidden');
-    });
+    }
 
-    document.getElementById('saveWorkerBtn').addEventListener('click', function() {
-        const name = document.getElementById('newWorkerName').value.trim();
-        const salary = parseFloat(document.getElementById('newWorkerSalary').value) || 0;
+    function saveNewWorker() {
+        const nameInput = document.getElementById('newWorkerName');
+        const salaryInput = document.getElementById('newWorkerSalary');
+        
+        const name = nameInput.value.trim();
+        const salary = parseFloat(salaryInput.value) || 0;
 
         if (!name || salary <= 0) {
             alert('الرجاء إدخال اسم العامل بشكل صحيح وراتب أكبر من الصفر');
@@ -191,50 +205,44 @@
         workers.push({ name: name, salary: salary, records: [] });
         saveLocalStorage();
         
-        document.getElementById('addWorkerView').classList.add('hidden');
-        document.getElementById('mainHomeView').classList.remove('hidden');
+        closeAddScreen();
         renderWorkersList();
-    });
+    }
 
-    document.getElementById('backToHomeBtn').addEventListener('click', function() {
+    function backToHome() {
         activeWorkerId = null;
         document.getElementById('workerProfileView').classList.add('hidden');
         document.getElementById('mainHomeView').classList.remove('hidden');
         renderWorkersList();
-    });
+    }
 
-    document.getElementById('recordDateDisplay').addEventListener('click', function() {
+    function openCalendar() {
         document.getElementById('workerProfileView').classList.add('hidden');
         document.getElementById('calendarView').classList.remove('hidden');
         renderCustomCalendar();
-    });
+    }
 
-    document.getElementById('closeCalBtn').addEventListener('click', function() {
+    function closeCalendar() {
         document.getElementById('calendarView').classList.add('hidden');
         document.getElementById('workerProfileView').classList.remove('hidden');
-    });
+    }
 
-    document.getElementById('prevMonthBtn').addEventListener('click', function() {
-        calCurrentDate.setMonth(calCurrentDate.getMonth() - 1);
+    function changeMonth(direction) {
+        calCurrentDate.setMonth(calCurrentDate.getMonth() + direction);
         renderCustomCalendar();
-    });
+    }
 
-    document.getElementById('nextMonthBtn').addEventListener('click', function() {
-        calCurrentDate.setMonth(calCurrentDate.getMonth() + 1);
-        renderCustomCalendar();
-    });
-
-    document.getElementById('recordStatus').addEventListener('change', function() {
-        const status = this.value;
+    function onStatusChange() {
+        const status = document.getElementById('recordStatus').value;
         const extraFields = document.getElementById('extraFieldsContainer');
         if (status === 'absent' || status === 'weekend') {
             extraFields.classList.add('hidden');
         } else {
             extraFields.classList.remove('hidden');
         }
-    });
+    }
 
-    document.getElementById('saveRecordBtn').addEventListener('click', function() {
+    function saveDayRecord() {
         const date = document.getElementById('recordDate').value;
         const status = document.getElementById('recordStatus').value;
         
@@ -267,10 +275,12 @@
         worker.records.sort((a, b) => new Date(b.date) - new Date(a.date));
         saveLocalStorage();
         renderWorkerDays();
-    });
+        alert('تم حفظ حركة اليوم بنجاح');
+    }
 
     function renderWorkersList() {
         const container = document.getElementById('workersListContainer');
+        if (!container) return;
         container.innerHTML = '';
         
         if (workers.length === 0) {
@@ -304,7 +314,6 @@
         document.getElementById('workerProfileView').classList.remove('hidden');
         renderWorkerDays();
     }
-    window.openWorkerProfile = openWorkerProfile;
 
     function deleteWorker(event, index) {
         event.stopPropagation();
@@ -314,11 +323,11 @@
             renderWorkersList();
         }
     }
-    window.deleteWorker = deleteWorker;
 
     function renderWorkerDays() {
         const container = document.getElementById('workerDaysList');
         const summaryContainer = document.getElementById('workerFinancialSummary');
+        if (!container) return;
         container.innerHTML = '';
         
         if (activeWorkerId === null || !workers[activeWorkerId]) return;
@@ -381,9 +390,8 @@
             renderWorkerDays();
         }
     }
-    window.deleteRecord = deleteRecord;
 
-    document.getElementById('copyReportBtn').addEventListener('click', function() {
+    function copyReport() {
         if (activeWorkerId === null || !workers[activeWorkerId]) return;
         
         const worker = workers[activeWorkerId];
@@ -397,4 +405,14 @@
         
         records.forEach(rec => {
             if (rec.status === 'present') totalDays++;
-            else if (rec.status === 'absent'
+            else if (rec.status === 'absent') {
+                totalAbsence++;
+                absentDates.push(rec.date);
+            }
+            
+            totalOvertime += (rec.overtime || 0);
+            totalOvertimeDouble += (rec.overtimeDouble || 0);
+            totalDelay += (rec.delay || 0);
+            totalWithdrawn += (rec.withdrawn || 0);
+            
+            if (rec.withdrawn > 0) withdrawnDetails.push(`${rec.date} (سح
