@@ -24,7 +24,7 @@
             padding: 20px;
             border-radius: 24px;
             width: 100%;
-            max-width: 460px;
+            max-width: 480px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -74,9 +74,7 @@
             transition: 0.2s;
         }
 
-        .btn-primary:hover {
-            background: #4338ca;
-        }
+        .btn-primary:hover { background: #4338ca; }
 
         .btn-secondary {
             background: #64748b;
@@ -117,9 +115,7 @@
             background: #fff;
         }
 
-        .worker-info span {
-            display: block;
-        }
+        .worker-info span { display: block; }
 
         .worker-name {
             font-size: 15px;
@@ -134,9 +130,7 @@
             margin-top: 2px;
         }
 
-        .input-group {
-            margin-bottom: 10px;
-        }
+        .input-group { margin-bottom: 10px; }
 
         label {
             display: block;
@@ -186,7 +180,6 @@
             padding: 14px;
             border-radius: 14px;
             margin-top: 14px;
-            text-align: center;
         }
 
         .summary-box div {
@@ -196,11 +189,28 @@
         }
 
         .summary-total {
-            font-size: 18px !important;
+            font-size: 16px !important;
             font-weight: 800 !important;
             border-top: 1px solid rgba(255,255,255,0.2);
             padding-top: 6px;
             margin-top: 6px;
+        }
+
+        .period-box {
+            background: #eef2ff;
+            border: 1px solid #c7d2fe;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .period-title {
+            font-weight: 800;
+            color: #3730a3;
+            font-size: 13px;
+            margin-bottom: 4px;
+            border-bottom: 1px dashed #c7d2fe;
+            padding-bottom: 2px;
         }
 
         .hidden { display: none !important; }
@@ -218,7 +228,7 @@
     <!-- واجهة قائمة العمال الرئيسية -->
     <div id="mainHomeView">
         <div class="section-title">
-            <span>قائمة العمال (10 عمال كحد أقصى أو أكثر)</span>
+            <span>قائمة العمال</span>
         </div>
         <button class="btn-primary" onclick="openAddWorkerModal()">➕ إضافة عامل جديد</button>
         <div id="workersListContainer" style="max-height: 380px; overflow-y: auto; margin-top: 8px;"></div>
@@ -226,54 +236,55 @@
 
     <!-- واجهة ملف العامل الشخصي واليوميات -->
     <div id="workerProfileView" class="hidden">
-        <button class="btn-secondary" onclick="backToHome()">⬅ العودة لقائمة العمال</button>
+        <button class="btn-secondary" onclick="backToHome()">⬅ العودة للقائمة</button>
         
-        <div style="margin-top: 12px; background: #e0e7ff; padding: 10px; border-radius: 12px; text-align: center;">
-            <div id="profileWorkerName" style="font-size: 16px; font-weight: 800; color: #312e81;"></div>
+        <div style="margin-top: 10px; background: #e0e7ff; padding: 10px; border-radius: 12px; text-align: center;">
+            <div id="profileWorkerName" style="font-size: 15px; font-weight: 800; color: #312e81;"></div>
             <div id="profileWorkerSalary" style="font-size: 12px; color: #4338ca; font-weight: 700;"></div>
         </div>
 
-        <div style="margin-top: 12px; border-top: 2px solid #f1f5f9; padding-top: 10px;">
-            <div class="section-title">تسجيل يومية العامل</div>
+        <div style="margin-top: 10px; border-top: 2px solid #f1f5f9; padding-top: 8px;">
+            <div class="section-title" style="font-size:13px;">تسجيل حركة يومية</div>
             
             <div class="input-group">
-                <label>تاريخ اليوم</label>
-                <input type="date" id="recordDate">
+                <label>التاريخ</label>
+                <input type="date" id="recordDate" onchange="checkAutoWeekend()">
             </div>
 
             <div class="input-group">
-                <label>حالة الدوام</label>
+                <label>حالة الدوام (السبت والأحد عطلة تلقائية)</label>
                 <select id="recordStatus" onchange="toggleRecordFields()">
                     <option value="present">داوم (كامل)</option>
                     <option value="absent">غائب</option>
+                    <option value="weekend">عطلة رسمية (سبت/أحد)</option>
                 </select>
             </div>
 
             <div id="extraFieldsContainer">
                 <div class="input-group">
                     <label>ساعات الإضافي (ساعة بساعة ونصف)</label>
-                    <input type="number" id="recordOvertime" placeholder="عدد الساعات (مثال: 2)" value="0">
+                    <input type="number" id="recordOvertime" value="0">
                 </div>
                 <div class="input-group">
                     <label>ساعات الإضافي (ساعة بساعتين)</label>
-                    <input type="number" id="recordOvertimeDouble" placeholder="عدد الساعات" value="0">
+                    <input type="number" id="recordOvertimeDouble" value="0">
                 </div>
                 <div class="input-group">
                     <label>ساعات التأخير</label>
-                    <input type="number" id="recordDelay" placeholder="عدد ساعات التأخير" value="0">
+                    <input type="number" id="recordDelay" value="0">
                 </div>
                 <div class="input-group">
-                    <label>مبلغ مسحوب (سلفية)</label>
-                    <input type="number" id="recordWithdrawn" placeholder="المبلغ" value="0">
+                    <label>مبلغ مسحوب (سلفية / سحب)</label>
+                    <input type="number" id="recordWithdrawn" value="0">
                 </div>
             </div>
 
             <button class="btn-primary" onclick="saveDayRecord()">💾 حفظ حركة هذا اليوم</button>
         </div>
 
-        <div style="margin-top: 10px;">
-            <div class="section-title">سجل الأيام المسجلة لهذا العامل</div>
-            <div id="workerDaysList" style="max-height: 180px; overflow-y: auto;"></div>
+        <div style="margin-top: 5px;">
+            <div class="section-title" style="font-size:13px;">سجل الأيام المسجلة</div>
+            <div id="workerDaysList" style="max-height: 150px; overflow-y: auto;"></div>
         </div>
 
         <div class="summary-box" id="workerFinancialSummary"></div>
@@ -290,7 +301,7 @@
         </div>
         <div class="input-group">
             <label>الراتب الشهري الأساسي</label>
-            <input type="number" id="newWorkerSalary" placeholder="أدخل الراتب الشهري">
+            <input type="number" id="newWorkerSalary" placeholder="أدخل الراتب">
         </div>
         <button class="btn-primary" onclick="addNewWorker()">حفظ العامل</button>
         <button class="btn-secondary" onclick="closeAddWorkerModal()" style="width:100%; margin-top:4px;">إلغاء</button>
@@ -301,11 +312,34 @@
 let workers = JSON.parse(localStorage.getItem('my_workers_data')) || [];
 let activeWorkerId = null;
 
-// ضبط تاريخ اليوم افتراضياً
+// ضبط تاريخ اليوم افتراضياً وفحص إذا كان عطلة
 document.getElementById('recordDate').valueAsDate = new Date();
+checkAutoWeekend();
 
 function saveData() {
     localStorage.setItem('my_workers_data', JSON.stringify(workers));
+}
+
+function getDayNameAndDateStr(dateString) {
+    const daysArr = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const d = new Date(dateString);
+    const dayName = daysArr[d.getDay()];
+    return { dayName, dayOfWeek: d.getDay() };
+}
+
+function checkAutoWeekend() {
+    const dateVal = document.getElementById('recordDate').value;
+    if (!dateVal) return;
+    const { dayOfWeek } = getDayNameAndDateStr(dateVal);
+    const statusSelect = document.getElementById('recordStatus');
+    
+    // 0 = الأحد, 6 = السبت
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+        statusSelect.value = 'weekend';
+    } else {
+        statusSelect.value = 'present';
+    }
+    toggleRecordFields();
 }
 
 function renderWorkersList() {
@@ -313,7 +347,7 @@ function renderWorkersList() {
     container.innerHTML = '';
     
     if (workers.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:13px; padding:20px;">لا يوجد عمال مضافين حالياً. اضغط على زر إضافة عامل جديد.</div>';
+        container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:13px; padding:20px;">لا يوجد عمال مضافين حالياً.</div>';
         return;
     }
 
@@ -323,7 +357,7 @@ function renderWorkersList() {
         card.innerHTML = `
             <div class="worker-info" onclick="openWorkerProfile(${index})">
                 <span class="worker-name">👤 ${worker.name}</span>
-                <span class="worker-salary">الراتب: ${worker.salary} ليرة</span>
+                <span class="worker-salary">الراتب: ${worker.salary} ليرة (على 30 يوم)</span>
             </div>
             <div>
                 <button class="btn-danger" onclick="deleteWorker(event, ${index})">حذف</button>
@@ -352,12 +386,7 @@ function addNewWorker() {
         return;
     }
 
-    workers.push({
-        name: name,
-        salary: salary,
-        records: [] // تخزين الحركات اليومية
-    });
-
+    workers.push({ name: name, salary: salary, records: [] });
     saveData();
     closeAddWorkerModal();
     renderWorkersList();
@@ -377,11 +406,12 @@ function openWorkerProfile(index) {
     const worker = workers[index];
     
     document.getElementById('profileWorkerName').innerText = worker.name;
-    document.getElementById('profileWorkerSalary').innerText = `الراتب الشهري: ${worker.salary} ليرة`;
+    document.getElementById('profileWorkerSalary').innerText = `الراتب الشهري: ${worker.salary} ليرة | اليومية: ${(worker.salary/30).toFixed(1)} ليرة`;
     
     document.getElementById('mainHomeView').classList.add('hidden');
     document.getElementById('workerProfileView').classList.remove('hidden');
     
+    checkAutoWeekend();
     renderWorkerDays();
 }
 
@@ -395,7 +425,7 @@ function backToHome() {
 function toggleRecordFields() {
     const status = document.getElementById('recordStatus').value;
     const extraFields = document.getElementById('extraFieldsContainer');
-    if (status === 'absent') {
+    if (status === 'absent' || status === 'weekend') {
         extraFields.classList.add('hidden');
     } else {
         extraFields.classList.remove('hidden');
@@ -411,14 +441,12 @@ function saveDayRecord() {
         return;
     }
 
-    const overtime = parseFloat(document.getElementById('recordOvertime').value) || 0;
-    const overtimeDouble = parseFloat(document.getElementById('recordOvertimeDouble').value) || 0;
-    const delay = parseFloat(document.getElementById('recordDelay').value) || 0;
+    const overtime = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertime').value) || 0);
+    const overtimeDouble = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordOvertimeDouble').value) || 0);
+    const delay = status === 'weekend' || status === 'absent' ? 0 : (parseFloat(document.getElementById('recordDelay').value) || 0);
     const withdrawn = parseFloat(document.getElementById('recordWithdrawn').value) || 0;
 
     const worker = workers[activeWorkerId];
-    
-    // إزالة أي سجل قديم بنفس التاريخ ليتم تحديثه
     worker.records = worker.records.filter(r => r.date !== date);
 
     worker.records.push({
@@ -430,19 +458,20 @@ function saveDayRecord() {
         withdrawn: withdrawn
     });
 
-    // ترتيب السجلات حسب التواريخ تنازلياً
     worker.records.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     saveData();
     renderWorkerDays();
-    alert('✅ تم حفظ حركة اليوم بنجاح');
+    alert('✅ تم حفظ الحركة بنجاح');
 }
 
 function deleteDayRecord(date) {
-    const worker = workers[activeWorkerId];
-    worker.records = worker.records.filter(r => r.date !== date);
-    saveData();
-    renderWorkerDays();
+    if (confirm('⚠️ هل أنت متأكد من حذف سجل هذا اليوم؟')) {
+        const worker = workers[activeWorkerId];
+        worker.records = worker.records.filter(r => r.date !== date);
+        saveData();
+        renderWorkerDays();
+    }
 }
 
 function renderWorkerDays() {
@@ -451,41 +480,55 @@ function renderWorkerDays() {
     container.innerHTML = '';
 
     if (worker.records.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; padding:10px;">لم يتم تسجيل أي يوم لهذا العامل بعد.</div>';
+        container.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px; padding:10px;">لا توجد أيام مسجلة بعد.</div>';
         document.getElementById('workerFinancialSummary').innerHTML = '<div>لا توجد بيانات حسابية بعد</div>';
         return;
     }
 
-    let totalWorkDaysCount = 0;
-    let totalAbsenceCount = 0;
-    let totalOvertimeHours15 = 0;
-    let totalOvertimeHours2 = 0;
-    let totalDelayHours = 0;
-    let totalWithdrawnAmount = 0;
-
     const dailyRate = worker.salary / 30;
     const hourlyRate = dailyRate / 9;
 
+    let p1Work = 0, p1Abs = 0, p1Ot15 = 0, p1Ot2 = 0, p1Delay = 0, p1Withdrawn = 0;
+    let p2Work = 0, p2Abs = 0, p2Ot15 = 0, p2Ot2 = 0, p2Delay = 0, p2Withdrawn = 0;
+
     worker.records.forEach(rec => {
-        if (rec.status === 'present') totalWorkDaysCount++;
-        if (rec.status === 'absent') totalAbsenceCount++;
-        totalOvertimeHours15 += rec.overtime;
-        totalOvertimeHours2 += rec.overtimeDouble;
-        totalDelayHours += rec.delay;
-        totalWithdrawnAmount += rec.withdrawn;
+        const { dayName } = getDayNameAndDateStr(rec.date);
+        const dayNum = parseInt(rec.date.split('-')[2]); // رقم اليوم من التاريخ
+
+        if (dayNum <= 15) {
+            if (rec.status === 'present') p1Work++;
+            if (rec.status === 'absent') p1Abs++;
+            p1Ot15 += rec.overtime;
+            p1Ot2 += rec.overtimeDouble;
+            p1Delay += rec.delay;
+            p1Withdrawn += rec.withdrawn;
+        } else {
+            if (rec.status === 'present') p2Work++;
+            if (rec.status === 'absent') p2Abs++;
+            p2Ot15 += rec.overtime;
+            p2Ot2 += rec.overtimeDouble;
+            p2Delay += rec.delay;
+            p2Withdrawn += rec.withdrawn;
+        }
 
         const box = document.createElement('div');
         box.className = 'day-record-box';
         
-        let detailsText = rec.status === 'present' ? '🟢 دوام كامل' : '🔴 غياب';
-        if (rec.overtime > 0) detailsText += ` | إضافي 1.5x: ${rec.overtime}س`;
-        if (rec.overtimeDouble > 0) detailsText += ` | إضافي 2x: ${rec.overtimeDouble}س`;
-        if (rec.delay > 0) detailsText += ` | تأخير: ${rec.delay}س`;
-        if (rec.withdrawn > 0) detailsText += ` | سحب: ${rec.withdrawn}`;
+        let statusLabel = '🟢 دوام كامل';
+        if (rec.status === 'absent') statusLabel = '🔴 غائب';
+        if (rec.status === 'weekend') statusLabel = '🌴 عطلة رسمية (سبت/أحد)';
+
+        let detailsText = `الحالة: ${statusLabel} (يومية: ${dailyRate.toFixed(1)} ليرة)`;
+        if (rec.status === 'present') {
+            if (rec.overtime > 0) detailsText += ` | إضافي 1.5x: ${rec.overtime}س`;
+            if (rec.overtimeDouble > 0) detailsText += ` | إضافي 2x: ${rec.overtimeDouble}س`;
+            if (rec.delay > 0) detailsText += ` | تأخير: ${rec.delay}س`;
+        }
+        if (rec.withdrawn > 0) detailsText += ` | سحب/سلفية: ${rec.withdrawn} ليرة`;
 
         box.innerHTML = `
             <div class="day-record-header">
-                <span>📅 ${rec.date}</span>
+                <span>📅 ${rec.date} (${dayName})</span>
                 <span style="cursor:pointer; color:#dc2626;" onclick="deleteDayRecord('${rec.date}')">حذف</span>
             </div>
             <div>${detailsText}</div>
@@ -493,23 +536,37 @@ function renderWorkerDays() {
         container.appendChild(box);
     });
 
-    // حساب الصافي النهائي
-    const amountWorkDays = totalWorkDaysCount * dailyRate;
-    const amountOvertime15 = totalOvertimeHours15 * hourlyRate * 1.5;
-    const amountOvertime2 = totalOvertimeHours2 * hourlyRate * 2;
-    const amountDelayCut = totalDelayHours * hourlyRate;
-    
-    const netSalary = amountWorkDays + amountOvertime15 + amountOvertime2 - amountDelayCut - totalWithdrawnAmount;
+    // حساب مبالغ الفترة الأولى (1 إلى 15)
+    const p1AmtWork = p1Work * dailyRate;
+    const p1AmtOt = (p1Ot15 * hourlyRate * 1.5) + (p1Ot2 * hourlyRate * 2);
+    const p1AmtDelay = p1Delay * hourlyRate;
+    const p1Net = p1AmtWork + p1AmtOt - p1AmtDelay - p1Withdrawn;
+
+    // حساب مبالغ الفترة الثانية (16 إلى 30)
+    const p2AmtWork = p2Work * dailyRate;
+    const p2AmtOt = (p2Ot15 * hourlyRate * 1.5) + (p2Ot2 * hourlyRate * 2);
+    const p2AmtDelay = p2Delay * hourlyRate;
+    const p2Net = p2AmtWork + p2AmtOt - p2AmtDelay - p2Withdrawn;
+
+    const totalNetMonth = p1Net + p2Net;
 
     document.getElementById('workerFinancialSummary').innerHTML = `
-        <div>عدد أيام الدوام: ${totalWorkDaysCount} يوم (${amountWorkDays.toFixed(1)} ليرة)</div>
-        <div>الإضافي والتأخير: +${(amountOvertime15+amountOvertime2).toFixed(1)} / -${amountDelayCut.toFixed(1)} ليرة</div>
-        <div>المبلغ المسحوب (سلف): ${totalWithdrawnAmount} ليرة</div>
-        <div class="summary-total">الصافي المستحق: ${netSalary.toFixed(2)} ليرة</div>
+        <div class="period-box">
+            <div class="period-title">📌 محاسبة النصف الأول (من 1 إلى 15):</div>
+            <div>أيام الدوام: ${p1Work} يوم | السحوبات: ${p1Withdrawn} ليرة</div>
+            <div style="font-weight:800; color:#312e81;">صافي الفترة الأولى: ${p1Net.toFixed(1)} ليرة</div>
+        </div>
+
+        <div class="period-box">
+            <div class="period-title">📌 محاسبة النصف الثاني (من 16 إلى 30):</div>
+            <div>أيام الدوام: ${p2Work} يوم | السحوبات: ${p2Withdrawn} ليرة</div>
+            <div style="font-weight:800; color:#312e81;">صافي الفترة الثانية: ${p2Net.toFixed(1)} ليرة</div>
+        </div>
+
+        <div class="summary-total">إجمالي المستحق للشهر بالكامل: ${totalNetMonth.toFixed(2)} ليرة</div>
     `;
 }
 
-// تشغيل القائمة عند فتح التطبيق
 renderWorkersList();
 </script>
 
