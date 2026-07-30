@@ -603,33 +603,28 @@
             summary.innerHTML = generateReportText();
             return;
         }
-        const daily = w.salary / 30;
-        const hourly = daily / 9;
+
         filteredRecs.forEach((r) => {
             const realIdx = w.records.findIndex(item => item.date === r.date);
-            let stTxt = r.status === 'present' ? 'إضافات / تعديل' : 'غائب';
-            let dayTotal = 0;
+            let stTxt = r.status === 'present' ? 'حاضر' : 'غائب';
             let details = [];
+            
             if (r.status === 'present') {
-                let otEarn = ((r.ot || 0) * hourly * 1.5) + ((r.ot2 || 0) * hourly * 2);
-                let delayCut = (r.delay || 0) * hourly;
-                let withAmt = (r.withdrawn || 0);
-                dayTotal = daily + otEarn - delayCut - withAmt;
                 if ((r.ot || 0) > 0) details.push(`إضافي 1.5: ${r.ot} س`);
                 if ((r.ot2 || 0) > 0) details.push(`إضافي 2x: ${r.ot2} س`);
                 if ((r.delay || 0) > 0) details.push(`تأخير: ${r.delay} س`);
-                if (withAmt > 0) details.push(`ساحب: ${withAmt}`);
+                if ((r.withdrawn || 0) > 0) details.push(`ساحب: ${r.withdrawn}`);
                 if (details.length === 0) details.push(`يوم دوام عادي`);
             } else { 
-                dayTotal = -daily; 
                 details.push(`غياب`); 
             }
+            
             let detailsStr = details.length > 0 ? `<div style="margin-top:4px; font-size:11px; color:#475569; line-height:1.5;">${details.join(' | ')}</div>` : '';
             const div = document.createElement('div');
             div.className = 'day-box';
             div.innerHTML = `
                 <div style="flex-grow:1;">
-                    <b>${r.date}</b> (${stTxt}) — <span style="color:#4f46e5; font-weight:bold;">${dayTotal.toFixed(2)} ليرة</span>
+                    <b>${r.date}</b> (${stTxt})
                     ${detailsStr}
                 </div>
                 <button type="button" class="btn-danger" onclick="deleteRec(${realIdx})">حذف</button>
