@@ -25,6 +25,9 @@
         .cal-day { padding: 8px 0; background: #f1f5f9; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .cal-day.present { background: #22c55e; color: #fff; }
         .cal-day.absent { background: #dc2626; color: #fff; }
+        
+        .profile-header { background: #e0e7ff; padding: 10px; border-radius: 8px; margin-bottom: 10px; position: relative; }
+        .edit-btn { position: absolute; top: 10px; left: 10px; background: none; border: none; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -57,16 +60,28 @@
     <div id="profileView" class="hidden">
         <button class="btn btn-secondary" onclick="showHome()">⬅ رجوع للقائمة</button>
         
-        <div style="background:#e0e7ff; padding:10px; border-radius:8px; margin-bottom:10px;">
-            <div class="input-group" style="margin-bottom:6px;">
-                <label>اسم العامل</label>
-                <input type="text" id="editWorkerName">
+        <!-- Worker Info Header -->
+        <div class="profile-header">
+            <!-- View Mode -->
+            <div id="displayWorkerInfo">
+                <div id="pName" style="font-weight:bold; color:#312e81; font-size:15px; text-align:center;"></div>
+                <div id="pSalary" style="font-size:12px; color:#4338ca; text-align:center;"></div>
+                <button class="edit-btn" onclick="enableEditMode()">✏️</button>
             </div>
-            <div class="input-group" style="margin-bottom:6px;">
-                <label>الراتب الشهري</label>
-                <input type="number" id="editWorkerSalary">
+            
+            <!-- Edit Mode -->
+            <div id="editWorkerInfo" class="hidden">
+                <div class="input-group" style="margin-bottom:6px;">
+                    <label>اسم العامل</label>
+                    <input type="text" id="editWorkerName">
+                </div>
+                <div class="input-group" style="margin-bottom:6px;">
+                    <label>الراتب الشهري</label>
+                    <input type="number" id="editWorkerSalary">
+                </div>
+                <button class="btn btn-primary" style="padding:6px; font-size:12px; margin-bottom:5px;" onclick="updateWorkerInfo()">💾 تحديث بيانات العامل</button>
+                <button class="btn btn-secondary" style="padding:6px; font-size:12px; margin-bottom:0;" onclick="cancelEditMode()">❌ إلغاء</button>
             </div>
-            <button class="btn btn-primary" style="padding:6px; font-size:12px; margin-bottom:0;" onclick="updateWorkerInfo()">💾 تحديث بيانات العامل</button>
         </div>
 
         <div class="input-group">
@@ -137,7 +152,14 @@
 </div>
 
 <script>
-    let workers = JSON.parse(localStorage.getItem('workers_data')) || [];
+    let workers = [];
+    try {
+        workers = JSON.parse(localStorage.getItem('workers_data'));
+        if (!Array.isArray(workers)) workers = [];
+    } catch (e) {
+        workers = [];
+    }
+
     let activeIdx = null;
     let calDate = new Date();
     let selectedDateStr = new Date().toISOString().split('T')[0];
@@ -179,6 +201,16 @@
         showHome();
     }
 
+    function enableEditMode() {
+        document.getElementById('displayWorkerInfo').classList.add('hidden');
+        document.getElementById('editWorkerInfo').classList.remove('hidden');
+    }
+
+    function cancelEditMode() {
+        document.getElementById('displayWorkerInfo').classList.remove('hidden');
+        document.getElementById('editWorkerInfo').classList.add('hidden');
+    }
+
     function updateWorkerInfo() {
         if (activeIdx === null) return;
         const name = document.getElementById('editWorkerName').value.trim();
@@ -190,8 +222,13 @@
         workers[activeIdx].name = name;
         workers[activeIdx].salary = salary;
         saveData();
+        
+        // تحديث الواجهة مباشرة
+        document.getElementById('pName').innerText = name;
+        document.getElementById('pSalary').innerText = `الراتب الشهري: ${salary} | اليومية: ${(salary/30).toFixed(1)}`;
+        
+        cancelEditMode();
         renderRecords();
-        alert('تم تحديث بيانات العامل بنجاح');
     }
 
     function renderWorkers() {
@@ -227,8 +264,17 @@
     function openProfile(i) {
         activeIdx = i;
         const w = workers[i];
+        
+        // تعيين نصوص العرض
+        document.getElementById('pName').innerText = w.name;
+        document.getElementById('pSalary').innerText = `الراتب الشهري: ${w.salary} | اليومية: ${(w.salary/30).toFixed(1)}`;
+        
+        // تعيين قيم التعديل
         document.getElementById('editWorkerName').value = w.name;
         document.getElementById('editWorkerSalary').value = w.salary;
+        
+        cancelEditMode(); // التأكد من إغلاق وضع التعديل عند فتح ملف العامل
+
         document.getElementById('recOther').value = w.other || 0;
         document.getElementById('homeView').classList.add('hidden');
         document.getElementById('profileView').classList.remove('hidden');
@@ -412,54 +458,4 @@
     function renderCalendar() {
         const y = calDate.getFullYear();
         const m = calDate.getMonth();
-        const mNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-        document.getElementById('calTitle').innerText = `${mNames[m]} ${y}`;
-
-        const firstDay = new Date(y, m, 1).getDay();
-        const totalDays = new Date(y, m + 1, 0).getDate();
-        const grid = document.getElementById('calGrid');
-        grid.innerHTML = '';
-
-        const recsMap = {};
-        if (workers[activeIdx].records) {
-            workers[activeIdx].records.forEach(r => recsMap[r.date] = r.status);
-        }
-
-        for (let i = 0; i < firstDay; i++) {
-            grid.appendChild(document.createElement('div'));
-        }
-
-        for (let d = 1; d <= totalDays; d++) {
-            const dayDiv = document.createElement('div');
-            dayDiv.className = 'cal-day';
-            dayDiv.innerText = d;
-            const mStr = String(m + 1).padStart(2, '0');
-            const dStr = String(d).padStart(2, '0');
-            const dKey = `${y}-${mStr}-${dStr}`;
-
-            if (recsMap[dKey]) {
-                dayDiv.classList.add(recsMap[dKey]);
-            }
-
-            dayDiv.onclick = function() {
-                selectedDateStr = dKey;
-                document.getElementById('recDate').value = dKey;
-                document.getElementById('recStatus').value = 'present';
-                document.getElementById('recOT').value = '0';
-                document.getElementById('recOT2').value = '0';
-                document.getElementById('recDelay').value = '0';
-                document.getElementById('recWithdrawn').value = '0';
-                toggleExtra();
-                hideCal();
-            };
-            grid.appendChild(dayDiv);
-        }
-    }
-
-    function copyReport() {
-        if (activeIdx === null) return;
-        const text = generateReportText();
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => alert('تم نسخ التقرير بنجاح'));
-        } else {
-            alert(text
+        const mNames = ['يناير','فبراير'
