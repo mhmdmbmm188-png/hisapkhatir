@@ -26,10 +26,8 @@
         .cal-day { padding: 8px 0; background: #f1f5f9; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .cal-day.present { background: #22c55e; color: #fff; }
         .cal-day.absent { background: #dc2626; color: #fff; }
-        
         .profile-header { background: #e0e7ff; padding: 10px; border-radius: 8px; margin-bottom: 10px; position: relative; }
         .edit-btn { position: absolute; top: 10px; left: 10px; background: none; border: none; font-size: 16px; cursor: pointer; }
-        
         .backup-group { display: flex; gap: 5px; margin-bottom: 10px; }
         .backup-group .btn { margin-bottom: 0; font-size: 12px; padding: 10px; }
     </style>
@@ -40,21 +38,18 @@
     <h2>سجل العمال والرواتب</h2>
     <div class="dev">إعداد: محمد المرعي</div>
 
-    <!-- Home View -->
+    <!-- واجهة الرئيسية -->
     <div id="homeView">
         <button class="btn btn-primary" onclick="showAddWorker()">➕ إضافة عامل جديد</button>
-        
-        <!-- Backup Buttons -->
         <div class="backup-group">
             <button class="btn btn-warning" onclick="exportData()">⬇️ حفظ نسخة لجهازي</button>
             <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">⬆️ استعادة</button>
             <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
         </div>
-
         <div id="workersList"></div>
     </div>
 
-    <!-- Add Worker View -->
+    <!-- إضافة عامل -->
     <div id="addView" class="hidden">
         <button class="btn btn-secondary" onclick="showHome()">⬅ رجوع</button>
         <div class="input-group">
@@ -68,20 +63,17 @@
         <button class="btn btn-primary" onclick="saveWorker()">💾 حفظ العامل</button>
     </div>
 
-    <!-- Worker Profile View -->
+    <!-- ملف العامل -->
     <div id="profileView" class="hidden">
         <button class="btn btn-secondary" onclick="showHome()">⬅ رجوع للقائمة</button>
         
-        <!-- Worker Info Header -->
         <div class="profile-header">
-            <!-- View Mode -->
             <div id="displayWorkerInfo">
                 <div id="pName" style="font-weight:bold; color:#312e81; font-size:15px; text-align:center;"></div>
                 <div id="pSalary" style="font-size:12px; color:#4338ca; text-align:center;"></div>
                 <button class="edit-btn" onclick="enableEditMode()">✏️</button>
             </div>
             
-            <!-- Edit Mode -->
             <div id="editWorkerInfo" class="hidden">
                 <div class="input-group" style="margin-bottom:6px;">
                     <label>اسم العامل</label>
@@ -142,7 +134,7 @@
         <button class="btn btn-primary" style="background:#10b981; margin-top:10px;" onclick="copyReport()">📋 نسخ التقرير</button>
     </div>
 
-    <!-- Calendar View -->
+    <!-- التقويم -->
     <div id="calView" class="hidden">
         <button class="btn btn-secondary" onclick="hideCal()">⬅ رجوع</button>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -169,53 +161,58 @@
     let calDate = new Date();
     let selectedDateStr = new Date().toISOString().split('T')[0];
 
-    // تحميل البيانات بحماية تامة لمنع أي كراش
+    // دالة الإشعارات الجديدة بدل alert
+    function showMsg(msg) {
+        let m = document.getElementById('toastMsg');
+        if(!m) {
+            m = document.createElement('div');
+            m.id = 'toastMsg';
+            m.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#334155;color:#fff;padding:12px 20px;border-radius:8px;z-index:9999;font-size:14px;box-shadow:0 4px 10px rgba(0,0,0,0.3);display:none;white-space:nowrap;';
+            document.body.appendChild(m);
+        }
+        m.innerText = msg;
+        m.style.display = 'block';
+        setTimeout(() => m.style.display = 'none', 2500);
+    }
+
     window.onload = function() {
         try {
             if (typeof window.localStorage !== 'undefined') {
                 let stored = window.localStorage.getItem('workers_data');
                 if (stored) {
                     let parsed = JSON.parse(stored);
-                    if (Array.isArray(parsed)) {
-                        workers = parsed;
-                    }
+                    if (Array.isArray(parsed)) workers = parsed;
                 }
             }
         } catch (e) {
-            console.warn("الذاكرة غير مدعومة حالياً");
-            workers = [];
+            // تجاهل خطأ الذاكرة بصمت
         }
-        
         document.getElementById('recDate').value = selectedDateStr;
         renderWorkers();
     };
 
-    // الحفظ بحماية تامة
     function saveData() {
         try {
             if (typeof window.localStorage !== 'undefined') {
                 window.localStorage.setItem('workers_data', JSON.stringify(workers));
             }
         } catch (e) {
-            console.warn("تعذر الحفظ في الذاكرة المؤقتة");
+            showMsg('الذاكرة غير مدعومة');
         }
     }
 
-    // تصدير البيانات (نسخة احتياطية للجهاز)
     function exportData() {
         if (workers.length === 0) {
-            alert('لا يوجد عمال لحفظهم');
+            showMsg('لا يوجد عمال لحفظهم');
             return;
         }
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(workers));
         const dlAnchorElem = document.createElement('a');
         dlAnchorElem.setAttribute("href", dataStr);
-        const date = new Date().toISOString().split('T')[0];
-        dlAnchorElem.setAttribute("download", `hisab_khatir_backup_${date}.json`);
+        dlAnchorElem.setAttribute("download", `hisab_backup_${selectedDateStr}.json`);
         dlAnchorElem.click();
     }
 
-    // استيراد البيانات
     function importData(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -227,16 +224,16 @@
                     workers = imported;
                     saveData();
                     renderWorkers();
-                    alert('تمت استعادة البيانات بنجاح!');
+                    showMsg('تم استعادة البيانات بنجاح!');
                 } else {
-                    alert('الملف غير متوافق');
+                    showMsg('الملف غير صحيح');
                 }
             } catch (err) {
-                alert('حدث خطأ أثناء قراءة الملف');
+                showMsg('خطأ بقراءة الملف');
             }
         };
         reader.readAsText(file);
-        event.target.value = ''; // تصفير الحقل
+        event.target.value = '';
     }
 
     function showHome() {
@@ -259,12 +256,13 @@
         const name = document.getElementById('workerName').value.trim();
         const salary = parseFloat(document.getElementById('workerSalary').value) || 0;
         if (!name || salary <= 0) {
-            alert('الرجاء إدخال الاسم بشكل صحيح وراتب أكبر من الصفر');
+            showMsg('اكتب الاسم والراتب بشكل صحيح');
             return;
         }
         workers.push({ name: name, salary: salary, records: [], other: 0 });
         saveData();
         showHome();
+        showMsg('تم إضافة العامل بنجاح');
     }
 
     function enableEditMode() {
@@ -282,18 +280,17 @@
         const name = document.getElementById('editWorkerName').value.trim();
         const salary = parseFloat(document.getElementById('editWorkerSalary').value) || 0;
         if (!name || salary <= 0) {
-            alert('الرجاء إدخال اسم صحيح وراتب أكبر من الصفر');
+            showMsg('تأكد من الاسم والراتب');
             return;
         }
         workers[activeIdx].name = name;
         workers[activeIdx].salary = salary;
         saveData();
-        
         document.getElementById('pName').innerText = name;
-        document.getElementById('pSalary').innerText = `الراتب الشهري: ${salary} | اليومية: ${(salary/30).toFixed(1)}`;
-        
+        document.getElementById('pSalary').innerText = `الراتب: ${salary} | اليومية: ${(salary/30).toFixed(1)}`;
         cancelEditMode();
         renderRecords();
+        showMsg('تم التحديث');
     }
 
     function renderWorkers() {
@@ -319,35 +316,27 @@
 
     function deleteWorker(e, i) {
         e.stopPropagation();
-        if (confirm('هل أنت متأكد من حذف هذا العامل؟')) {
-            workers.splice(i, 1);
-            saveData();
-            renderWorkers();
-        }
+        workers.splice(i, 1);
+        saveData();
+        renderWorkers();
+        showMsg('تم حذف العامل');
     }
 
     function openProfile(i) {
         activeIdx = i;
         const w = workers[i];
-        
         document.getElementById('pName').innerText = w.name;
-        document.getElementById('pSalary').innerText = `الراتب الشهري: ${w.salary} | اليومية: ${(w.salary/30).toFixed(1)}`;
-        
+        document.getElementById('pSalary').innerText = `الراتب: ${w.salary} | اليومية: ${(w.salary/30).toFixed(1)}`;
         document.getElementById('editWorkerName').value = w.name;
         document.getElementById('editWorkerSalary').value = w.salary;
-        
         cancelEditMode(); 
-
         document.getElementById('recOther').value = w.other || 0;
-        
-        // تصفير الخانات اليومية
         document.getElementById('recOT').value = '0';
         document.getElementById('recOT2').value = '0';
         document.getElementById('recDelay').value = '0';
         document.getElementById('recWithdrawn').value = '0';
         document.getElementById('recStatus').value = 'present';
         toggleExtra();
-
         document.getElementById('homeView').classList.add('hidden');
         document.getElementById('profileView').classList.remove('hidden');
         renderRecords();
@@ -380,7 +369,7 @@
         w.records.sort((a,b) => new Date(b.date) - new Date(a.date));
         saveData();
         renderRecords();
-        alert('تم حفظ الحركة بنجاح');
+        showMsg('تم حفظ الحركة');
     }
 
     function getFormattedDateName(dateStr) {
@@ -395,36 +384,25 @@
     function generateReportText() {
         const w = workers[activeIdx];
         const recs = w.records || [];
-        
         let days = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0, absentTot = 0;
         let delayDates = [], absentDates = [];
-
         recs.forEach(r => {
             if (r.status === 'present') {
                 days++;
-                if ((r.delay || 0) > 0) {
-                    delayTot += r.delay;
-                    delayDates.push(getFormattedDateName(r.date));
-                }
+                if ((r.delay || 0) > 0) { delayTot += r.delay; delayDates.push(getFormattedDateName(r.date)); }
             } else if (r.status === 'absent') {
-                absentTot++;
-                absentDates.push(getFormattedDateName(r.date));
+                absentTot++; absentDates.push(getFormattedDateName(r.date));
             }
-            otTot += (r.ot || 0);
-            ot2Tot += (r.ot2 || 0);
-            withTot += (r.withdrawn || 0);
+            otTot += (r.ot || 0); ot2Tot += (r.ot2 || 0); withTot += (r.withdrawn || 0);
         });
-
         const daily = w.salary / 30;
         const hourly = daily / 9;
-        
         const earnedDays = days * daily;
         const earnedOt = otTot * hourly * 1.5;
         const earnedOt2 = ot2Tot * hourly * 2;
         const cutDelay = delayTot * hourly;
         const cutAbsence = absentTot * daily;
         const otherVal = w.other || 0;
-
         const net = earnedDays + earnedOt + earnedOt2 - cutDelay - cutAbsence - withTot + otherVal;
 
         let txt = `📊 تقرير تفاصيل الراتب\n`;
@@ -434,25 +412,20 @@
         txt += `📅 كم يوم مداوم (${days} يوم): ${earnedDays.toFixed(2)} ليرة\n`;
         if (otTot > 0) txt += `➕ إضافي (1.5x) (${otTot} ساعة): +${earnedOt.toFixed(2)} ليرة\n`;
         if (ot2Tot > 0) txt += `➕ إضافي (2x) (${ot2Tot} ساعة): +${earnedOt2.toFixed(2)} ليرة\n`;
-        if (delayTot > 0) {
-            txt += `➖ التأخير (${delayTot} ساعة): -${cutDelay.toFixed(2)} ليرة\n`;
-            txt += `   📌 تواريخ التأخير: ${delayDates.join(' - ')}\n`;
-        }
-        if (absentTot > 0) {
-            txt += `➖ الغياب (${absentTot} يوم): -${cutAbsence.toFixed(2)} ليرة\n`;
-            txt += `   📌 تواريخ الغياب: ${absentDates.join(' - ')}\n`;
-        }
-        if (withTot > 0) {
-            txt += `➖ ساحب: -${withTot.toFixed(2)} ليرة\n`;
-        }
-        if (otherVal !== 0) {
-            txt += `➕ آخر (ضل من حساب القديم): ${otherVal > 0 ? '+' : ''}${otherVal.toFixed(2)} ليرة\n`;
-        }
+        if (delayTot > 0) { txt += `➖ التأخير (${delayTot} ساعة): -${cutDelay.toFixed(2)} ليرة\n   📌 تواريخ التأخير: ${delayDates.join(' - ')}\n`; }
+        if (absentTot > 0) { txt += `➖ الغياب (${absentTot} يوم): -${cutAbsence.toFixed(2)} ليرة\n   📌 تواريخ الغياب: ${absentDates.join(' - ')}\n`; }
+        if (withTot > 0) txt += `➖ ساحب: -${withTot.toFixed(2)} ليرة\n`;
+        if (otherVal !== 0) txt += `➕ آخر: ${otherVal > 0 ? '+' : ''}${otherVal.toFixed(2)} ليرة\n`;
         txt += `-------------------\n`;
         txt += `💰 المجموع الكامل: ${net.toFixed(2)} ليرة`;
-
         return txt;
     }
 
     function renderRecords() {
-        const
+        const list = document.getElementById('recordsList');
+        const summary = document.getElementById('summaryBox');
+        list.innerHTML = '';
+        const w = workers[activeIdx];
+        const recs = w.records || [];
+        
+        if (r
