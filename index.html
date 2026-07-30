@@ -49,7 +49,7 @@
         </div>
         <div class="input-group">
             <label>كلمة المرور</label>
-            <input type="password" id="authPassword" placeholder="اكتب كلمة المرور">
+            <input type="password" id="authPassword" placeholder="اكتب كلمة المرور (6 أحرف على الأقل)">
         </div>
         <button type="button" id="authBtn" class="btn btn-primary" onclick="handleAuth()">دخول</button>
         <button type="button" class="btn btn-secondary" style="background:#64748b; font-size:12px; padding:10px; margin-bottom:0;" onclick="toggleAuthMode()">ليس لديك حساب؟ إنشاء حساب</button>
@@ -249,13 +249,14 @@
             showMsg('اكتب اسم المستخدم وكلمة المرور');
             return;
         }
-        const email = userInput.toLowerCase().replace(/[^a-z0-9]/g, '_') + '@hisapkhatir.app';
+        const encodedName = btoa(unescape(encodeURIComponent(userInput))).replace(/=/g, '');
+        const email = encodedName + '@hisapkhatir.app';
 
         if (isSignUpMode) {
             auth.createUserWithEmailAndPassword(email, pass).then(() => {
                 showMsg('تم إنشاء الحساب بنجاح!');
             }).catch(() => {
-                showMsg('خطأ: الاسم مستخدم مسبقاً أو كلمة المرور ضعيفة');
+                showMsg('خطأ: كلمة المرور 6 أحرف على الأقل أو الاسم مستخدم');
             });
         } else {
             auth.signInWithEmailAndPassword(email, pass).then(() => {
