@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سجل العمال والرواتب</title>
+    <title>حساب خاطر - سجل العمال</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
         body { background: #0f172a; padding: 10px; color: #1e293b; }
@@ -15,7 +15,7 @@
         .btn-secondary { background: #64748b; color: #fff; }
         .btn-warning { background: #f59e0b; color: #fff; }
         .btn-danger { background: #dc2626; color: #fff; padding: 6px 12px; font-size: 11px; border-radius: 6px; }
-        .input-group { margin-bottom: 12px; }
+        .input-group { margin-bottom: 12px; text-align: right; }
         label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #334155; }
         input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #f8fafc; }
         .worker-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -37,14 +37,26 @@
 <body>
 <div class="app">
     <div id="connStatus" style="font-size:11px; text-align:center; padding:5px; background:#f1f5f9; border-radius:6px; margin-bottom:12px; color:#64748b; font-weight:bold;">جاري التحقق من الاتصال...</div>
-    <h2>سجل العمال والرواتب</h2>
+    <h2>حساب خاطر</h2>
     <div class="dev">إعداد: محمد المرعي</div>
 
-    <!-- شاشة تسجيل الدخول عبر جوجل -->
+    <!-- شاشة تسجيل الدخول -->
     <div id="authView" style="background:#f8fafc; padding:20px; border-radius:12px; text-align:center; border:1px solid #cbd5e1;">
-        <h3 style="color:#312e81; margin-bottom:10px; font-size:16px;">تسجيل الدخول للنظام</h3>
-        <p style="font-size:12px; color:#64748b; margin-bottom:15px;">سجل دخولك بحساب جوجل لحفظ بياناتك بشكل آمن دائم.</p>
-        <button type="button" class="btn btn-primary" style="background:#db4437;" onclick="loginWithGoogle()">🔴 تسجيل الدخول بواسطة جوجل</button>
+        <h3 id="authTitle" style="color:#312e81; margin-bottom:10px; font-size:16px;">تسجيل الدخول للنظام</h3>
+        <button type="button" class="btn btn-primary" style="background:#db4437; margin-bottom:15px;" onclick="loginWithGoogle()">🔴 الدخول بواسطة جوجل</button>
+        <div style="border-top:1px solid #cbd5e1; margin:15px 0; position:relative;"><span style="background:#f8fafc; padding:0 10px; color:#64748b; font-size:11px; position:relative; top:-10px;">أو عبر البريد الإلكتروني</span></div>
+        
+        <div class="input-group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="authEmail" placeholder="example@domain.com">
+        </div>
+        <div class="input-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="authPassword" placeholder="******">
+        </div>
+        <button type="button" class="btn btn-primary" id="authSubmitBtn" onclick="handleEmailAuth()">تسجيل الدخول</button>
+        <button type="button" class="btn btn-secondary" style="background:#64748b; font-size:12px; margin-top:5px;" onclick="toggleAuthMode()" id="toggleAuthBtn">إنشاء حساب جديد</button>
+        <button type="button" class="btn btn-secondary" style="background:#475569; font-size:11px; margin-top:5px;" onclick="forgotPassword()">نسيت كلمة المرور؟</button>
     </div>
 
     <div id="homeView" class="hidden">
@@ -198,6 +210,7 @@
     let activeIdx = null;
     let calDate = new Date();
     let selectedDateStr = new Date().toISOString().split('T')[0];
+    let isRegisterMode = false;
 
     function showMsg(msg) {
         let m = document.getElementById('toastMsg');
@@ -226,12 +239,54 @@
         }
     });
 
+    function toggleAuthMode() {
+        isRegisterMode = !isRegisterMode;
+        document.getElementById('authTitle').innerText = isRegisterMode ? 'إنشاء حساب جديد' : 'تسجيل الدخول للنظام';
+        document.getElementById('authSubmitBtn').innerText = isRegisterMode ? 'إنشاء الحساب' : 'تسجيل الدخول';
+        document.getElementById('toggleAuthBtn').innerText = isRegisterMode ? 'لديك حساب؟ تسجيل دخول' : 'إنشاء حساب جديد';
+    }
+
     function loginWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
         auth.signInWithPopup(provider).then(() => {
             showMsg('تم تسجيل الدخول بنجاح');
         }).catch((error) => {
             showMsg('فشل تسجيل الدخول: ' + error.message);
+        });
+    }
+
+    function handleEmailAuth() {
+        const email = document.getElementById('authEmail').value.trim();
+        const password = document.getElementById('authPassword').value.trim();
+        if (!email || !password) {
+            showMsg('الرجاء إدخال البريد وكلمة المرور');
+            return;
+        }
+        if (isRegisterMode) {
+            auth.createUserWithEmailAndPassword(email, password).then(() => {
+                showMsg('تم إنشاء الحساب بنجاح');
+            }).catch((error) => {
+                showMsg('خطأ: ' + error.message);
+            });
+        } else {
+            auth.signInWithEmailAndPassword(email, password).then(() => {
+                showMsg('تم تسجيل الدخول بنجاح');
+            }).catch((error) => {
+                showMsg('خطأ: ' + error.message);
+            });
+        }
+    }
+
+    function forgotPassword() {
+        const email = document.getElementById('authEmail').value.trim() || prompt("أدخل بريدك الإلكتروني المسجل:");
+        if (!email) {
+            showMsg('الرجاء كتابة البريد الإلكتروني أولاً');
+            return;
+        }
+        auth.sendPasswordResetEmail(email).then(() => {
+            showMsg('تم إرسال رابط استعادة كلمة المرور إلى بريدك');
+        }).catch((error) => {
+            showMsg('خطأ: ' + error.message);
         });
     }
 
@@ -456,8 +511,7 @@
         const d = new Date(dateStr);
         const dayName = daysArr[d.getDay()];
         const parts = dateStr.split('-');
-        const formatted = `${parts[2]}.${parts[1]}.${parts[0]}`;
-        return `يوم ${dayName} ${formatted}`;
+        return `يوم ${dayName} ${parts[2]}.${parts[1]}.${parts[0]}`;
     }
 
     function getFilteredRecords() {
@@ -672,7 +726,7 @@
 
     function copyReport() {
         if (activeIdx === null) return;
-        const text = generateReportTest();
+        const text = generateReportText();
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(() => showMsg('تم النسخ'));
         } else {
