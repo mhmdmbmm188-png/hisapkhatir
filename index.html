@@ -31,6 +31,9 @@
         .backup-group { display: flex; gap: 5px; margin-bottom: 10px; }
         .backup-group .btn { margin-bottom: 0; font-size: 12px; padding: 10px; }
     </style>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -154,8 +157,19 @@
         <div id="calGrid" class="calendar-grid"></div>
     </div>
 </div>
-
 <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDcQOkPejPSlzOxQixqaQFViLO96QRJo8Q",
+      authDomain: "hisapkhatir.firebaseapp.com",
+      databaseURL: "https://hisapkhatir-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "hisapkhatir",
+      storageBucket: "hisapkhatir.firebasestorage.app",
+      messagingSenderId: "493775178117",
+      appId: "1:493775178117:web:4a2daf8c7f75011f55dcec"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     let workers = [];
     let activeIdx = null;
     let calDate = new Date();
@@ -175,26 +189,40 @@
     }
 
     window.onload = function() {
-        try {
-            if (typeof window.localStorage !== 'undefined') {
+        db.ref('workers').once('value').then((snapshot) => {
+            const data = snapshot.val();
+            if (data && Array.isArray(data)) {
+                workers = data;
+            } else {
                 let stored = window.localStorage.getItem('workers_data');
                 if (stored) {
                     let parsed = JSON.parse(stored);
                     if (Array.isArray(parsed)) workers = parsed;
                 }
             }
-        } catch (e) {}
-        document.getElementById('recDate').value = selectedDateStr;
-        renderWorkers();
+            document.getElementById('recDate').value = selectedDateStr;
+            renderWorkers();
+        }).catch(() => {
+            let stored = window.localStorage.getItem('workers_data');
+            if (stored) {
+                let parsed = JSON.parse(stored);
+                if (Array.isArray(parsed)) workers = parsed;
+            }
+            document.getElementById('recDate').value = selectedDateStr;
+            renderWorkers();
+        });
     };
 
     function saveData() {
         try {
-            if (typeof window.localStorage !== 'undefined') {
-                window.localStorage.setItem('workers_data', JSON.stringify(workers));
-            }
+            window.localStorage.setItem('workers_data', JSON.stringify(workers));
+            db.ref('workers').set(workers).then(() => {
+                showMsg('تم الحفظ على السحابة بنجاح');
+            }).catch(() => {
+                showMsg('تم الحفظ محلياً (لا يوجد اتصال بالسحابة)');
+            });
         } catch (e) {
-            showMsg('الذاكرة غير مدعومة');
+            showMsg('خطأ في حفظ البيانات');
         }
     }
 
