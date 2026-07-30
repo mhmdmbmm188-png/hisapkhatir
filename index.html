@@ -424,4 +424,116 @@
     }
 
     function renderRecords() {
-        const list = do
+        const list = document.getElementById('recordsList');
+        const summary = document.getElementById('summaryBox');
+        list.innerHTML = '';
+        const w = workers[activeIdx];
+        const recs = w.records || [];
+        
+        if (recs.length === 0 && (!w.other || w.other === 0)) {
+            list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px;">لا توجد حركات.</div>';
+            summary.innerHTML = 'المجموع الكامل: 0.00 ليرة';
+            return;
+        }
+        const daily = w.salary / 30;
+        const hourly = daily / 9;
+        recs.forEach((r, idx) => {
+            let stTxt = r.status === 'present' ? 'داوم' : 'غائب';
+            let dayTotal = 0;
+            let details = [];
+            if (r.status === 'present') {
+                let otEarn = ((r.ot || 0) * hourly * 1.5) + ((r.ot2 || 0) * hourly * 2);
+                let delayCut = (r.delay || 0) * hourly;
+                let withAmt = (r.withdrawn || 0);
+                dayTotal = daily + otEarn - delayCut - withAmt;
+                if ((r.ot || 0) > 0 || (r.ot2 || 0) > 0) details.push(`مساي: +${otEarn.toFixed(1)}`);
+                if ((r.delay || 0) > 0) details.push(`تأخير: -${delayCut.toFixed(1)}`);
+                if (withAmt > 0) details.push(`ساحب: -${withAmt.toFixed(1)}`);
+            } else { dayTotal = -daily; details.push(`غياب`); }
+            let detailsStr = details.length > 0 ? `<br><span style="font-size:10px; color:#64748b;">${details.join(' | ')}</span>` : '';
+            const div = document.createElement('div');
+            div.className = 'day-box';
+            div.innerHTML = `
+                <div>
+                    <b>${r.date}</b> (${stTxt}) — <span style="color:#4f46e5; font-weight:bold;">${dayTotal.toFixed(2)} ليرة</span>
+                    ${detailsStr}
+                </div>
+                <button type="button" class="btn-danger" onclick="deleteRec(${idx})">حذف</button>
+            `;
+            list.appendChild(div);
+        });
+        summary.innerText = generateReportText();
+    }
+
+    function deleteRec(idx) {
+        workers[activeIdx].records.splice(idx, 1);
+        saveData();
+        renderRecords();
+        showMsg('تم حذف الحركة');
+    }
+
+    function showCal() {
+        document.getElementById('profileView').classList.add('hidden');
+        document.getElementById('calView').classList.remove('hidden');
+        renderCalendar();
+    }
+
+    function hideCal() {
+        document.getElementById('calView').classList.add('hidden');
+        document.getElementById('profileView').classList.remove('hidden');
+    }
+
+    function changeMonth(dir) {
+        calDate.setMonth(calDate.getMonth() + dir);
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        const y = calDate.getFullYear();
+        const m = calDate.getMonth();
+        const mNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+        document.getElementById('calTitle').innerText = `${mNames[m]} ${y}`;
+        const firstDay = new Date(y, m, 1).getDay();
+        const totalDays = new Date(y, m + 1, 0).getDate();
+        const grid = document.getElementById('calGrid');
+        grid.innerHTML = '';
+        const recsMap = {};
+        if (workers[activeIdx].records) {
+            workers[activeIdx].records.forEach(r => recsMap[r.date] = r.status);
+        }
+        for (let i = 0; i < firstDay; i++) { grid.appendChild(document.createElement('div')); }
+        for (let d = 1; d <= totalDays; d++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'cal-day';
+            dayDiv.innerText = d;
+            const mStr = String(m + 1).padStart(2, '0');
+            const dStr = String(d).padStart(2, '0');
+            const dKey = `${y}-${mStr}-${dStr}`;
+            if (recsMap[dKey]) dayDiv.classList.add(recsMap[dKey]);
+            dayDiv.onclick = function() {
+                selectedDateStr = dKey;
+                document.getElementById('recDate').value = dKey;
+                document.getElementById('recStatus').value = 'present';
+                document.getElementById('recOT').value = '0';
+                document.getElementById('recOT2').value = '0';
+                document.getElementById('recDelay').value = '0';
+                document.getElementById('recWithdrawn').value = '0';
+                toggleExtra();
+                hideCal();
+            };
+            grid.appendChild(dayDiv);
+        }
+    }
+
+    function copyReport() {
+        if (activeIdx === null) return;
+        const text = generateReportText();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => showMsg('تم النسخ'));
+        } else {
+            showMsg('النسخ التلقائي ما اشتغل بجهازك');
+        }
+    }
+</script>
+</body>
+</html>
