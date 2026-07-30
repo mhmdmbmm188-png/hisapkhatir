@@ -109,7 +109,7 @@
         <button class="btn btn-primary" onclick="saveRecord()">💾 حفظ الحركة</button>
 
         <div style="margin-top:15px; font-weight:bold; font-size:13px;">السجل اليومي:</div>
-        <div id="recordsList" style="max-height:150px; overflow-y:auto; margin-top:5px;"></div>
+        <div id="recordsList" style="max-height:180px; overflow-y:auto; margin-top:5px;"></div>
 
         <div class="summary" id="summaryBox"></div>
         <button class="btn btn-primary" style="background:#10b981; margin-top:10px;" onclick="copyReport()">📋 نسخ التقرير</button>
@@ -348,12 +348,37 @@
             return;
         }
 
+        const daily = w.salary / 30;
+        const hourly = daily / 9;
+
         recs.forEach((r, idx) => {
             let stTxt = r.status === 'present' ? 'داوم' : 'غائب';
+            let dayTotal = 0;
+            let details = [];
+
+            if (r.status === 'present') {
+                let otEarn = ((r.ot || 0) * hourly * 1.5) + ((r.ot2 || 0) * hourly * 2);
+                let delayCut = (r.delay || 0) * hourly;
+                let withAmt = (r.withdrawn || 0);
+                dayTotal = daily + otEarn - delayCut - withAmt;
+
+                if ((r.ot || 0) > 0 || (r.ot2 || 0) > 0) details.push(`مساي: +${otEarn.toFixed(1)}`);
+                if ((r.delay || 0) > 0) details.push(`تأخير: -${delayCut.toFixed(1)}`);
+                if (withAmt > 0) details.push(`ساحب: -${withAmt.toFixed(1)}`);
+            } else {
+                dayTotal = -daily;
+                details.push(`غياب`);
+            }
+
+            let detailsStr = details.length > 0 ? `<br><span style="font-size:10px; color:#64748b;">${details.join(' | ')}</span>` : '';
+
             const div = document.createElement('div');
             div.className = 'day-box';
             div.innerHTML = `
-                <div><b>${r.date}</b> (${stTxt})</div>
+                <div>
+                    <b>${r.date}</b> (${stTxt}) — <span style="color:#4f46e5; font-weight:bold;">${dayTotal.toFixed(2)} ليرة</span>
+                    ${detailsStr}
+                </div>
                 <button class="btn-danger" onclick="deleteRec(${idx})">حذف</button>
             `;
             list.appendChild(div);
@@ -437,9 +462,4 @@
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(() => alert('تم نسخ التقرير بنجاح'));
         } else {
-            alert(text);
-        }
-    }
-</script>
-</body>
-</html>
+            alert(text
