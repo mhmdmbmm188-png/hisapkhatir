@@ -23,8 +23,7 @@
         .summary { background: #4f46e5; color: #fff; padding: 14px; border-radius: 8px; margin-top: 12px; font-size: 13px; font-weight: bold; white-space: pre-line; line-height: 1.8; }
         .day-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 13px; line-height: 1.6; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; }
-        .cal-day { padding: 8px 0; background: #f1f5f9; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
-        .cal-day.present { background: #22c55e; color: #fff; }
+        .cal-day { padding: 8px 0; background: #22c55e; color: #fff; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .cal-day.absent { background: #dc2626; color: #fff; }
         .profile-header { background: #e0e7ff; padding: 12px; border-radius: 8px; margin-bottom: 12px; position: relative; }
         .edit-btn { position: absolute; top: 10px; left: 10px; background: none; border: none; font-size: 16px; cursor: pointer; }
@@ -93,7 +92,7 @@
         <div class="input-group">
             <label>الحالة</label>
             <select id="recStatus" onchange="toggleExtra()">
-                <option value="present">داوم (كامل)</option>
+                <option value="present">دوام (افتراضي)</option>
                 <option value="absent">غائب</option>
             </select>
         </div>
@@ -119,7 +118,7 @@
 
         <div class="input-group">
             <label>آخر (ضل من حساب القديم / إضافي عام)</label>
-            <input type="text" id="recOther" placeholder="">
+            <input type="text" id="recOther" placeholder="مثال: ضل 2000">
         </div>
 
         <button type="button" class="btn btn-primary" onclick="saveRecord()">💾 حفظ الحركة</button>
@@ -392,13 +391,28 @@
         const status = document.getElementById('recStatus').value;
 
         w.records = w.records.filter(r => r.date !== date);
+        // If it's present and no extras/withdrawn added, we don't even need to store a record since present is default!
+        const ot = parseFloat(document.getElementById('recOT').value) || 0;
+        const ot2 = parseFloat(document.getElementById('recOT2').value) || 0;
+        const delay = parseFloat(document.getElementById('recDelay').value) || 0;
+        const withdrawn = parseFloat(document.getElementById('recWithdrawn').value) || 0;
+
+        if (status === 'present' && ot === 0 && ot2 === 0 && delay === 0 && withdrawn === 0) {
+            // Just removing record if it exists since it's normal present day
+            w.other = document.getElementById('recOther').value;
+            saveData();
+            renderRecords();
+            showMsg('تم الحفظ (يوم دوام عادي)');
+            return;
+        }
+
         w.records.push({
             date: date,
             status: status,
-            ot: status === 'absent' ? 0 : parseFloat(document.getElementById('recOT').value) || 0,
-            ot2: status === 'absent' ? 0 : parseFloat(document.getElementById('recOT2').value) || 0,
-            delay: status === 'absent' ? 0 : parseFloat(document.getElementById('recDelay').value) || 0,
-            withdrawn: parseFloat(document.getElementById('recWithdrawn').value) || 0
+            ot: status === 'absent' ? 0 : ot,
+            ot2: status === 'absent' ? 0 : ot2,
+            delay: status === 'absent' ? 0 : delay,
+            withdrawn: withdrawn
         });
         w.other = document.getElementById('recOther').value;
         w.records.sort((a,b) => new Date(b.date) - new Date(a.date));
@@ -419,17 +433,25 @@
     function generateReportText() {
         const w = workers[activeIdx];
         const recs = w.records || [];
-        let days = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0, absentTot = 0;
+        let absentTot = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
         let delayDates = [], absentDates = [];
+        
         recs.forEach(r => {
-            if (r.status === 'present') {
-                days++;
-                if ((r.delay || 0) > 0) { delayTot += r.delay; delayDates.push(getFormattedDateName(r.date)); }
-            } else if (r.status === 'absent') {
-                absentTot++; absentDates.push(getFormattedDateName(r.date));
+            if (r.status === 'absent') {
+                absentTot++;
+                absentDates.push(getFormattedDateName(r.date));
+            } else {
+                if ((r.delay || 0) > 0) {
+                    delayTot += r.delay;
+                    delayDates.push(getFormattedDateName(r.date));
+                }
             }
-            otTot += (r.ot || 0); ot2Tot += (r.ot2 || 0); withTot += (r.withdrawn || 0);
+            otTot += (r.ot || 0);
+            ot2Tot += (r.ot2 || 0);
+            withTot += (r.withdrawn || 0);
         });
+
+        const days = 30 - absentTot;
         const daily = w.salary / 30;
         const hourly = daily / 9;
         const earnedDays = days * daily;
@@ -437,8 +459,14 @@
         const earnedOt2 = ot2Tot * hourly * 2;
         const cutDelay = delayTot * hourly;
         const cutAbsence = absentTot * daily;
-        const otherVal = parseFloat(w.other) || 0;
-        const net = earnedDays + earnedOt + earnedOt2 - cutDelay - cutAbsence - withTot + otherVal;
+        
+        let otherVal = 0;
+        if (w.other && w.other.trim() !== '') {
+            const match = w.other.match(/-?\d+(\.\d+)?/);
+            otherVal = match ? parseFloat(match[0]) : 0;
+        }
+
+        const net = earnedDays + earnedOt + earnedOt2 - cutDelay - withTot + otherVal;
 
         let txt = `📊 تقرير تفاصيل الراتب\n`;
         txt += `👤 اسم العامل: ${w.name}\n`;
@@ -487,14 +515,14 @@
         const recs = w.records || [];
         
         if (recs.length === 0 && (!w.other || w.other.trim() === '')) {
-            list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px;">لا توجد حركات.</div>';
-            summary.innerHTML = 'المجموع الكامل: 0.00 ليرة';
+            list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px;">لا توجد حركات مسجلة (كل الأيام دوام افتراضي).</div>';
+            summary.innerHTML = generateReportText();
             return;
         }
         const daily = w.salary / 30;
         const hourly = daily / 9;
         recs.forEach((r, idx) => {
-            let stTxt = r.status === 'present' ? 'داوم' : 'غائب';
+            let stTxt = r.status === 'present' ? 'إضافات / تعديل' : 'غائب';
             let dayTotal = 0;
             let details = [];
             if (r.status === 'present') {
@@ -506,6 +534,7 @@
                 if ((r.ot2 || 0) > 0) details.push(`إضافي 2x: ${r.ot2} س`);
                 if ((r.delay || 0) > 0) details.push(`تأخير: ${r.delay} س`);
                 if (withAmt > 0) details.push(`ساحب: ${withAmt}`);
+                if (details.length === 0) details.push(`يوم دوام عادي`);
             } else { 
                 dayTotal = -daily; 
                 details.push(`غياب`); 
@@ -571,7 +600,12 @@
             const mStr = String(m + 1).padStart(2, '0');
             const dStr = String(d).padStart(2, '0');
             const dKey = `${y}-${mStr}-${dStr}`;
-            if (recsMap[dKey]) dayDiv.classList.add(recsMap[dKey]);
+            
+            const status = recsMap[dKey] || 'present';
+            if (status === 'absent') {
+                dayDiv.classList.add('absent');
+            }
+
             dayDiv.onclick = function() {
                 selectedDateStr = dKey;
                 document.getElementById('recDate').value = dKey;
