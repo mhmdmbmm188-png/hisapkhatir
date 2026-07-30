@@ -31,18 +31,15 @@
         .backup-group { display: flex; gap: 5px; margin-bottom: 12px; }
         .backup-group .btn { margin-bottom: 0; font-size: 12px; padding: 10px; }
     </style>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
-
 <div class="app">
     <div id="connStatus" style="font-size:11px; text-align:center; padding:5px; background:#f1f5f9; border-radius:6px; margin-bottom:12px; color:#64748b; font-weight:bold;">جاري التحقق من الاتصال...</div>
     <h2>سجل العمال والرواتب</h2>
     <div class="dev">إعداد: محمد المرعي</div>
 
-    <!-- واجهة الرئيسية -->
     <div id="homeView">
         <button type="button" class="btn btn-primary" onclick="showAddWorker()">➕ إضافة عامل جديد</button>
         <div class="backup-group">
@@ -53,31 +50,27 @@
         <div id="workersList"></div>
     </div>
 
-    <!-- إضافة عامل -->
     <div id="addView" class="hidden">
         <button type="button" class="btn btn-secondary" onclick="showHome()">⬅ رجوع</button>
         <div class="input-group">
             <label>اسم العامل</label>
-            <input type="text" id="workerName" placeholder="أدخل الاسم">
+            <input type="text" id="workerName" placeholder="">
         </div>
         <div class="input-group">
             <label>الراتب الشهري</label>
-            <input type="number" id="workerSalary" placeholder="أدخل الراتب">
+            <input type="number" id="workerSalary" placeholder="">
         </div>
         <button type="button" class="btn btn-primary" onclick="saveWorker()">💾 حفظ العامل</button>
     </div>
 
-    <!-- ملف العامل -->
     <div id="profileView" class="hidden">
         <button type="button" class="btn btn-secondary" onclick="showHome()">⬅ رجوع للقائمة</button>
-        
         <div class="profile-header">
             <div id="displayWorkerInfo">
                 <div id="pName" style="font-weight:bold; color:#312e81; font-size:15px; text-align:center;"></div>
                 <div id="pSalary" style="font-size:12px; color:#4338ca; text-align:center; margin-top:4px;"></div>
                 <button type="button" class="edit-btn" onclick="enableEditMode()">✏️</button>
             </div>
-            
             <div id="editWorkerInfo" class="hidden">
                 <div class="input-group" style="margin-bottom:8px;">
                     <label>اسم العامل</label>
@@ -126,7 +119,7 @@
 
         <div class="input-group">
             <label>آخر (ضل من حساب القديم / إضافي عام)</label>
-            <input type="text" id="recOther" placeholder="أدخل أرقام أو حروف">
+            <input type="text" id="recOther" placeholder="">
         </div>
 
         <button type="button" class="btn btn-primary" onclick="saveRecord()">💾 حفظ الحركة</button>
@@ -138,7 +131,6 @@
         <button type="button" class="btn btn-primary" style="background:#10b981; margin-top:12px;" onclick="copyReport()">📋 نسخ التقرير</button>
     </div>
 
-    <!-- التقويم -->
     <div id="calView" class="hidden">
         <button type="button" class="btn btn-secondary" onclick="hideCal()">⬅ رجوع</button>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -231,7 +223,7 @@
         try {
             window.localStorage.setItem('workers_data', JSON.stringify(workers));
             db.ref('workers').set(workers).then(() => {
-                showMsg('تم التحديث وحفظ التغييرات على السحابة');
+                showMsg('تم الحفظ على السحابة');
             }).catch(() => {
                 showMsg('تم الحفظ محلياً');
             });
@@ -263,7 +255,7 @@
                     workers = imported;
                     saveData();
                     renderWorkers();
-                    showMsg('تم استعادة البيانات بنجاح!');
+                    showMsg('تم الاستعادة بنجاح!');
                 } else {
                     showMsg('الملف غير صحيح');
                 }
@@ -294,19 +286,16 @@
     function saveWorker() {
         const nameField = document.getElementById('workerName');
         const salaryField = document.getElementById('workerSalary');
-        
         const name = nameField.value.trim();
         const salary = parseFloat(salaryField.value) || 0;
-        
         if (!name || salary <= 0) {
-            showMsg('اكتب الاسم والراتب بشكل صحيح');
+            showMsg('اكتب الاسم والراتب');
             return;
         }
-        
         workers.push({ name: name, salary: salary, records: [], other: '' });
         saveData();
         showHome();
-        showMsg('تم إضافة العامل وحفظه بالسحابة');
+        showMsg('تم إضافة العامل');
     }
 
     function enableEditMode() {
@@ -334,7 +323,7 @@
         document.getElementById('pSalary').innerText = `الراتب: ${salary} | اليومية: ${(salary/30).toFixed(1)}`;
         cancelEditMode();
         renderRecords();
-        showMsg('تم التحديث بالسحابة');
+        showMsg('تم التحديث');
     }
 
     function renderWorkers() {
@@ -364,7 +353,7 @@
             workers.splice(i, 1);
             saveData();
             renderWorkers();
-            showMsg('تم حذف العامل من السحابة');
+            showMsg('تم الحذف');
         }
     }
 
@@ -415,7 +404,7 @@
         w.records.sort((a,b) => new Date(b.date) - new Date(a.date));
         saveData();
         renderRecords();
-        showMsg('تم حفظ الحركة بالسحابة');
+        showMsg('تم الحفظ');
     }
 
     function getFormattedDateName(dateStr) {
@@ -456,12 +445,35 @@
         txt += `💰 الراتب الشهري: ${w.salary} ليرة\n`;
         txt += `-------------------\n`;
         txt += `📅 كم يوم مداوم (${days} يوم): ${earnedDays.toFixed(2)} ليرة\n`;
-        if (otTot > 0) txt += `➕ إضافي 1.5 (${otTot} ساعة): +${earnedOt.toFixed(2)} ليرة\n`;
-        if (ot2Tot > 0) txt += `➕ إضافي 2x (${ot2Tot} ساعة): +${earnedOt2.toFixed(2)} ليرة\n`;
-        if (delayTot > 0) { txt += `➖ التأخير (${delayTot} ساعة): -${cutDelay.toFixed(2)} ليرة\n   📌 تواريخ التأخير: ${delayDates.join(' - ')}\n`; }
-        if (absentTot > 0) { txt += `➖ الغياب (${absentTot} يوم): -${cutAbsence.toFixed(2)} ليرة\n   📌 تواريخ الغياب: ${absentDates.join(' - ')}\n`; }
-        if (withTot > 0) txt += `➖ ساحب: -${withTot.toFixed(2)} ليرة\n`;
-        if (w.other && w.other.trim() !== '') txt += `➕ آخر (${w.other}): ${otherVal >= 0 ? '+' : ''}${otherVal} ليرة\n`;
+        
+        if (otTot > 0 || ot2Tot > 0) {
+            txt += `-------------------\n`;
+            if (otTot > 0) txt += `➕ إضافي 1.5 (${otTot} ساعة): +${earnedOt.toFixed(2)} ليرة\n`;
+            if (ot2Tot > 0) txt += `➕ إضافي 2x (${ot2Tot} ساعة): +${earnedOt2.toFixed(2)} ليرة\n`;
+        }
+        
+        if (delayTot > 0) {
+            txt += `-------------------\n`;
+            txt += `➖ التأخير (${delayTot} ساعة): -${cutDelay.toFixed(2)} ليرة\n`;
+            txt += `📌 تواريخ التأخير: ${delayDates.join(' - ')}\n`;
+        }
+        
+        if (absentTot > 0) {
+            txt += `-------------------\n`;
+            txt += `➖ الغياب (${absentTot} يوم): -${cutAbsence.toFixed(2)} ليرة\n`;
+            txt += `📌 تواريخ الغياب: ${absentDates.join(' - ')}\n`;
+        }
+        
+        if (withTot > 0) {
+            txt += `-------------------\n`;
+            txt += `➖ ساحب: -${withTot.toFixed(2)} ليرة\n`;
+        }
+        
+        if (w.other && w.other.trim() !== '') {
+            txt += `-------------------\n`;
+            txt += `➕ آخر (${w.other}): ${otherVal >= 0 ? '+' : ''}${otherVal} ليرة\n`;
+        }
+        
         txt += `-------------------\n`;
         txt += `💰 المجموع الكامل: ${net.toFixed(2)} ليرة`;
         return txt;
@@ -518,7 +530,7 @@
             workers[activeIdx].records.splice(idx, 1);
             saveData();
             renderRecords();
-            showMsg('تم حذف الحركة من السحابة');
+            showMsg('تم الحذف');
         }
     }
 
@@ -581,7 +593,7 @@
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(() => showMsg('تم النسخ'));
         } else {
-            showMsg('النسخ التلقائي ما اشتغل بجهازك');
+            showMsg('النسخ التلقائي ما اشتغل');
         }
     }
 </script>
