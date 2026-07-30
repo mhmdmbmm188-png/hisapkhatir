@@ -85,6 +85,15 @@
         </div>
 
         <div class="input-group">
+            <label>فترة الحساب</label>
+            <select id="calcPeriod" onchange="renderRecords()">
+                <option value="all">الشهر كامل (30 يوم)</option>
+                <option value="p1">النصف الأول (من 1 إلى 15)</option>
+                <option value="p2">النصف الثاني (من 16 إلى نهاية الشهر)</option>
+            </select>
+        </div>
+
+        <div class="input-group">
             <label>التاريخ</label>
             <input type="text" id="recDate" readonly onclick="showCal()" style="background:#fff; text-align:center; font-weight:bold; cursor:pointer;">
         </div>
@@ -365,6 +374,7 @@
         document.getElementById('editWorkerSalary').value = w.salary;
         cancelEditMode(); 
         document.getElementById('recOther').value = w.other || '';
+        document.getElementById('calcPeriod').value = 'all';
         document.getElementById('recOT').value = '';
         document.getElementById('recOT2').value = '';
         document.getElementById('recDelay').value = '';
@@ -391,14 +401,12 @@
         const status = document.getElementById('recStatus').value;
 
         w.records = w.records.filter(r => r.date !== date);
-        // If it's present and no extras/withdrawn added, we don't even need to store a record since present is default!
         const ot = parseFloat(document.getElementById('recOT').value) || 0;
         const ot2 = parseFloat(document.getElementById('recOT2').value) || 0;
         const delay = parseFloat(document.getElementById('recDelay').value) || 0;
         const withdrawn = parseFloat(document.getElementById('recWithdrawn').value) || 0;
 
         if (status === 'present' && ot === 0 && ot2 === 0 && delay === 0 && withdrawn === 0) {
-            // Just removing record if it exists since it's normal present day
             w.other = document.getElementById('recOther').value;
             saveData();
             renderRecords();
@@ -430,13 +438,32 @@
         return `يوم ${dayName} ${formatted}`;
     }
 
-    function generateReportText() {
+    function getFilteredRecords() {
         const w = workers[activeIdx];
         const recs = w.records || [];
+        const period = document.getElementById('calcPeriod').value;
+        const currentRecDate = document.getElementById('recDate').value;
+        const [targetYear, targetMonth] = currentRecDate.split('-');
+
+        return recs.filter(r => {
+            const [y, m, dStr] = r.date.split('-');
+            if (y !== targetYear || m !== targetMonth) return false;
+            const d = parseInt(dStr);
+            if (period === 'p1') return d >= 1 && d <= 15;
+            if (period === 'p2') return d >= 16;
+            return true;
+        });
+    }
+
+    function generateReportText() {
+        const w = workers[activeIdx];
+        const period = document.getElementById('calcPeriod').value;
+        const filteredRecs = getFilteredRecords();
+        
         let absentTot = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
         let delayDates = [], absentDates = [];
         
-        recs.forEach(r => {
+        filteredRecs.forEach(r => {
             if (r.status === 'absent') {
                 absentTot++;
                 absentDates.push(getFormattedDateName(r.date));
@@ -451,7 +478,8 @@
             withTot += (r.withdrawn || 0);
         });
 
-        const days = 30 - absentTot;
+        const totalDaysInPeriod = (period === 'all') ? 30 : 15;
+        const days = totalDaysInPeriod - absentTot;
         const daily = w.salary / 30;
         const hourly = daily / 9;
         const earnedDays = days * daily;
@@ -461,14 +489,15 @@
         const cutAbsence = absentTot * daily;
         
         let otherVal = 0;
-        if (w.other && w.other.trim() !== '') {
+        if (w.other && w.other.trim() !== '' && period === 'all') {
             const match = w.other.match(/-?\d+(\.\d+)?/);
             otherVal = match ? parseFloat(match[0]) : 0;
         }
 
-        const net = earnedDays + earnedOt + earnedOt2 - cutDelay - withTot + otherVal;
+        const net = earnedDays + earnedOt + earnedOt2 - cutDelay - withTot + (period === 'all' ? otherVal : 0);
 
-        let txt = `📊 تقرير تفاصيل الراتب\n`;
+        let periodTitle = period === 'p1' ? 'النصف الأول (1 إلى 15)' : (period === 'p2' ? 'النصف الثاني (16 إلى 30)' : 'الشهر كامل');
+        let txt = `📊 تقرير تفاصيل الراتب (${periodTitle})\n`;
         txt += `👤 اسم العامل: ${w.name}\n`;
         txt += `💰 الراتب الشهري: ${w.salary} ليرة\n`;
         txt += `-------------------\n`;
@@ -497,7 +526,7 @@
             txt += `➖ ساحب: -${withTot.toFixed(2)} ليرة\n`;
         }
         
-        if (w.other && w.other.trim() !== '') {
+        if (w.other && w.other.trim() !== '' && period === 'all') {
             txt += `-------------------\n`;
             txt += `➕ آخر (${w.other}): ${otherVal >= 0 ? '+' : ''}${otherVal} ليرة\n`;
         }
@@ -512,16 +541,18 @@
         const summary = document.getElementById('summaryBox');
         list.innerHTML = '';
         const w = workers[activeIdx];
-        const recs = w.records || [];
+        const period = document.getElementById('calcPeriod').value;
+        const filteredRecs = getFilteredRecords();
         
-        if (recs.length === 0 && (!w.other || w.other.trim() === '')) {
-            list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px;">لا توجد حركات مسجلة (كل الأيام دوام افتراضي).</div>';
+        if (filteredRecs.length === 0 && (!w.other || w.other.trim() === '' || period !== 'all')) {
+            list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px;">لا توجد حركات مسجلة في هذه الفترة (دوام كامل).</div>';
             summary.innerHTML = generateReportText();
             return;
         }
         const daily = w.salary / 30;
         const hourly = daily / 9;
-        recs.forEach((r, idx) => {
+        filteredRecs.forEach((r) => {
+            const realIdx = w.records.findIndex(item => item.date === r.date);
             let stTxt = r.status === 'present' ? 'إضافات / تعديل' : 'غائب';
             let dayTotal = 0;
             let details = [];
@@ -547,7 +578,7 @@
                     <b>${r.date}</b> (${stTxt}) — <span style="color:#4f46e5; font-weight:bold;">${dayTotal.toFixed(2)} ليرة</span>
                     ${detailsStr}
                 </div>
-                <button type="button" class="btn-danger" onclick="deleteRec(${idx})">حذف</button>
+                <button type="button" class="btn-danger" onclick="deleteRec(${realIdx})">حذف</button>
             `;
             list.appendChild(div);
         });
@@ -616,6 +647,7 @@
                 document.getElementById('recWithdrawn').value = '';
                 toggleExtra();
                 hideCal();
+                renderRecords();
             };
             grid.appendChild(dayDiv);
         }
