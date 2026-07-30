@@ -14,21 +14,21 @@
         .btn-primary { background: #4f46e5; color: #fff; }
         .btn-secondary { background: #64748b; color: #fff; }
         .btn-warning { background: #f59e0b; color: #fff; }
-        .btn-danger { background: #dc2626; color: #fff; padding: 5px 10px; font-size: 11px; border-radius: 6px; }
-        .input-group { margin-bottom: 10px; }
-        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #334155; }
+        .btn-danger { background: #dc2626; color: #fff; padding: 6px 12px; font-size: 11px; border-radius: 6px; }
+        .input-group { margin-bottom: 12px; }
+        label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #334155; }
         input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #f8fafc; }
-        .worker-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .worker-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .hidden { display: none !important; }
-        .summary { background: #4f46e5; color: #fff; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 12px; font-weight: bold; white-space: pre-line; line-height: 1.6; }
-        .day-box { background: #f1f5f9; padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .summary { background: #4f46e5; color: #fff; padding: 14px; border-radius: 8px; margin-top: 12px; font-size: 13px; font-weight: bold; white-space: pre-line; line-height: 1.8; }
+        .day-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 13px; line-height: 1.6; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; }
         .cal-day { padding: 8px 0; background: #f1f5f9; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .cal-day.present { background: #22c55e; color: #fff; }
         .cal-day.absent { background: #dc2626; color: #fff; }
-        .profile-header { background: #e0e7ff; padding: 10px; border-radius: 8px; margin-bottom: 10px; position: relative; }
+        .profile-header { background: #e0e7ff; padding: 12px; border-radius: 8px; margin-bottom: 12px; position: relative; }
         .edit-btn { position: absolute; top: 10px; left: 10px; background: none; border: none; font-size: 16px; cursor: pointer; }
-        .backup-group { display: flex; gap: 5px; margin-bottom: 10px; }
+        .backup-group { display: flex; gap: 5px; margin-bottom: 12px; }
         .backup-group .btn { margin-bottom: 0; font-size: 12px; padding: 10px; }
     </style>
     <!-- Firebase SDKs -->
@@ -38,7 +38,7 @@
 <body>
 
 <div class="app">
-    <div id="connStatus" style="font-size:11px; text-align:center; padding:4px; background:#f1f5f9; border-radius:6px; margin-bottom:10px; color:#64748b; font-weight:bold;">جاري التحقق من الاتصال...</div>
+    <div id="connStatus" style="font-size:11px; text-align:center; padding:5px; background:#f1f5f9; border-radius:6px; margin-bottom:12px; color:#64748b; font-weight:bold;">جاري التحقق من الاتصال...</div>
     <h2>سجل العمال والرواتب</h2>
     <div class="dev">إعداد: محمد المرعي</div>
 
@@ -74,21 +74,21 @@
         <div class="profile-header">
             <div id="displayWorkerInfo">
                 <div id="pName" style="font-weight:bold; color:#312e81; font-size:15px; text-align:center;"></div>
-                <div id="pSalary" style="font-size:12px; color:#4338ca; text-align:center;"></div>
+                <div id="pSalary" style="font-size:12px; color:#4338ca; text-align:center; margin-top:4px;"></div>
                 <button type="button" class="edit-btn" onclick="enableEditMode()">✏️</button>
             </div>
             
             <div id="editWorkerInfo" class="hidden">
-                <div class="input-group" style="margin-bottom:6px;">
+                <div class="input-group" style="margin-bottom:8px;">
                     <label>اسم العامل</label>
                     <input type="text" id="editWorkerName">
                 </div>
-                <div class="input-group" style="margin-bottom:6px;">
+                <div class="input-group" style="margin-bottom:8px;">
                     <label>الراتب الشهري</label>
                     <input type="number" id="editWorkerSalary">
                 </div>
-                <button type="button" class="btn btn-primary" style="padding:6px; font-size:12px; margin-bottom:5px;" onclick="updateWorkerInfo()">💾 تحديث بيانات العامل</button>
-                <button type="button" class="btn btn-secondary" style="padding:6px; font-size:12px; margin-bottom:0;" onclick="cancelEditMode()">❌ إلغاء</button>
+                <button type="button" class="btn btn-primary" style="padding:8px; font-size:12px; margin-bottom:6px;" onclick="updateWorkerInfo()">💾 تحديث بيانات العامل</button>
+                <button type="button" class="btn btn-secondary" style="padding:8px; font-size:12px; margin-bottom:0;" onclick="cancelEditMode()">❌ إلغاء</button>
             </div>
         </div>
 
@@ -108,43 +108,43 @@
         <div id="extraContainer">
             <div class="input-group">
                 <label>ساعات الإضافي (1.5x)</label>
-                <input type="number" id="recOT" value="0">
+                <input type="number" id="recOT" placeholder="">
             </div>
             <div class="input-group">
                 <label>ساعات الإضافي (2x)</label>
-                <input type="number" id="recOT2" value="0">
+                <input type="number" id="recOT2" placeholder="">
             </div>
             <div class="input-group">
                 <label>ساعات التأخير</label>
-                <input type="number" id="recDelay" value="0">
+                <input type="number" id="recDelay" placeholder="">
             </div>
             <div class="input-group">
                 <label>مبلغ مسحوب (سلفية)</label>
-                <input type="number" id="recWithdrawn" value="0">
+                <input type="number" id="recWithdrawn" placeholder="">
             </div>
         </div>
 
         <div class="input-group">
             <label>آخر (ضل من حساب القديم / إضافي عام)</label>
-            <input type="number" id="recOther" value="0">
+            <input type="text" id="recOther" placeholder="أدخل أرقام أو حروف">
         </div>
 
         <button type="button" class="btn btn-primary" onclick="saveRecord()">💾 حفظ الحركة</button>
 
         <div style="margin-top:15px; font-weight:bold; font-size:13px;">السجل اليومي:</div>
-        <div id="recordsList" style="max-height:180px; overflow-y:auto; margin-top:5px;"></div>
+        <div id="recordsList" style="max-height:220px; overflow-y:auto; margin-top:8px;"></div>
 
         <div class="summary" id="summaryBox"></div>
-        <button type="button" class="btn btn-primary" style="background:#10b981; margin-top:10px;" onclick="copyReport()">📋 نسخ التقرير</button>
+        <button type="button" class="btn btn-primary" style="background:#10b981; margin-top:12px;" onclick="copyReport()">📋 نسخ التقرير</button>
     </div>
 
     <!-- التقويم -->
     <div id="calView" class="hidden">
         <button type="button" class="btn btn-secondary" onclick="hideCal()">⬅ رجوع</button>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <button type="button" class="btn btn-secondary" style="width:auto; padding:5px 10px;" onclick="changeMonth(-1)">▶</button>
+            <button type="button" class="btn btn-secondary" style="width:auto; padding:6px 12px;" onclick="changeMonth(-1)">▶</button>
             <span id="calTitle" style="font-weight:bold; color:#312e81;"></span>
-            <button type="button" class="btn btn-secondary" style="width:auto; padding:5px 10px;" onclick="changeMonth(1)">◀</button>
+            <button type="button" class="btn btn-secondary" style="width:auto; padding:6px 12px;" onclick="changeMonth(1)">◀</button>
         </div>
         <div class="calendar-grid">
             <div style="font-size:11px; font-weight:bold; color:#64748b;">أحد</div>
@@ -171,7 +171,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // مراقبة حالة الاتصال بالانترنت والسحابة مباشرة
     db.ref('.info/connected').on('value', function(snap) {
         const statusEl = document.getElementById('connStatus');
         if (snap.val() === true) {
@@ -304,7 +303,7 @@
             return;
         }
         
-        workers.push({ name: name, salary: salary, records: [], other: 0 });
+        workers.push({ name: name, salary: salary, records: [], other: '' });
         saveData();
         showHome();
         showMsg('تم إضافة العامل وحفظه بالسحابة');
@@ -351,7 +350,7 @@
             div.innerHTML = `
                 <div style="flex-grow:1; cursor:pointer;" onclick="openProfile(${i})">
                     <div style="font-weight:bold;">👤 ${w.name}</div>
-                    <div style="font-size:11px; color:#64748b;">الراتب: ${w.salary}</div>
+                    <div style="font-size:11px; color:#64748b; margin-top:3px;">الراتب: ${w.salary}</div>
                 </div>
                 <button type="button" class="btn-danger" onclick="deleteWorker(event, ${i})">حذف</button>
             `;
@@ -361,10 +360,12 @@
 
     function deleteWorker(e, i) {
         e.stopPropagation();
-        workers.splice(i, 1);
-        saveData();
-        renderWorkers();
-        showMsg('تم حذف العامل من السحابة');
+        if (confirm('هل أنت متأكد من حذف هذا العامل؟')) {
+            workers.splice(i, 1);
+            saveData();
+            renderWorkers();
+            showMsg('تم حذف العامل من السحابة');
+        }
     }
 
     function openProfile(i) {
@@ -375,11 +376,11 @@
         document.getElementById('editWorkerName').value = w.name;
         document.getElementById('editWorkerSalary').value = w.salary;
         cancelEditMode(); 
-        document.getElementById('recOther').value = w.other || 0;
-        document.getElementById('recOT').value = '0';
-        document.getElementById('recOT2').value = '0';
-        document.getElementById('recDelay').value = '0';
-        document.getElementById('recWithdrawn').value = '0';
+        document.getElementById('recOther').value = w.other || '';
+        document.getElementById('recOT').value = '';
+        document.getElementById('recOT2').value = '';
+        document.getElementById('recDelay').value = '';
+        document.getElementById('recWithdrawn').value = '';
         document.getElementById('recStatus').value = 'present';
         toggleExtra();
         document.getElementById('homeView').classList.add('hidden');
@@ -410,7 +411,7 @@
             delay: status === 'absent' ? 0 : parseFloat(document.getElementById('recDelay').value) || 0,
             withdrawn: parseFloat(document.getElementById('recWithdrawn').value) || 0
         });
-        w.other = parseFloat(document.getElementById('recOther').value) || 0;
+        w.other = document.getElementById('recOther').value;
         w.records.sort((a,b) => new Date(b.date) - new Date(a.date));
         saveData();
         renderRecords();
@@ -447,7 +448,7 @@
         const earnedOt2 = ot2Tot * hourly * 2;
         const cutDelay = delayTot * hourly;
         const cutAbsence = absentTot * daily;
-        const otherVal = w.other || 0;
+        const otherVal = parseFloat(w.other) || 0;
         const net = earnedDays + earnedOt + earnedOt2 - cutDelay - cutAbsence - withTot + otherVal;
 
         let txt = `📊 تقرير تفاصيل الراتب\n`;
@@ -455,12 +456,12 @@
         txt += `💰 الراتب الشهري: ${w.salary} ليرة\n`;
         txt += `-------------------\n`;
         txt += `📅 كم يوم مداوم (${days} يوم): ${earnedDays.toFixed(2)} ليرة\n`;
-        if (otTot > 0) txt += `➕ إضافي (1.5x) (${otTot} ساعة): +${earnedOt.toFixed(2)} ليرة\n`;
-        if (ot2Tot > 0) txt += `➕ إضافي (2x) (${ot2Tot} ساعة): +${earnedOt2.toFixed(2)} ليرة\n`;
+        if (otTot > 0) txt += `➕ إضافي 1.5 (${otTot} ساعة): +${earnedOt.toFixed(2)} ليرة\n`;
+        if (ot2Tot > 0) txt += `➕ إضافي 2x (${ot2Tot} ساعة): +${earnedOt2.toFixed(2)} ليرة\n`;
         if (delayTot > 0) { txt += `➖ التأخير (${delayTot} ساعة): -${cutDelay.toFixed(2)} ليرة\n   📌 تواريخ التأخير: ${delayDates.join(' - ')}\n`; }
         if (absentTot > 0) { txt += `➖ الغياب (${absentTot} يوم): -${cutAbsence.toFixed(2)} ليرة\n   📌 تواريخ الغياب: ${absentDates.join(' - ')}\n`; }
         if (withTot > 0) txt += `➖ ساحب: -${withTot.toFixed(2)} ليرة\n`;
-        if (otherVal !== 0) txt += `➕ آخر: ${otherVal > 0 ? '+' : ''}${otherVal.toFixed(2)} ليرة\n`;
+        if (w.other && w.other.trim() !== '') txt += `➕ آخر (${w.other}): ${otherVal >= 0 ? '+' : ''}${otherVal} ليرة\n`;
         txt += `-------------------\n`;
         txt += `💰 المجموع الكامل: ${net.toFixed(2)} ليرة`;
         return txt;
@@ -473,7 +474,7 @@
         const w = workers[activeIdx];
         const recs = w.records || [];
         
-        if (recs.length === 0 && (!w.other || w.other === 0)) {
+        if (recs.length === 0 && (!w.other || w.other.trim() === '')) {
             list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px;">لا توجد حركات.</div>';
             summary.innerHTML = 'المجموع الكامل: 0.00 ليرة';
             return;
@@ -489,15 +490,19 @@
                 let delayCut = (r.delay || 0) * hourly;
                 let withAmt = (r.withdrawn || 0);
                 dayTotal = daily + otEarn - delayCut - withAmt;
-                if ((r.ot || 0) > 0 || (r.ot2 || 0) > 0) details.push(`مساي: +${otEarn.toFixed(1)}`);
-                if ((r.delay || 0) > 0) details.push(`تأخير: -${delayCut.toFixed(1)}`);
-                if (withAmt > 0) details.push(`ساحب: -${withAmt.toFixed(1)}`);
-            } else { dayTotal = -daily; details.push(`غياب`); }
-            let detailsStr = details.length > 0 ? `<br><span style="font-size:10px; color:#64748b;">${details.join(' | ')}</span>` : '';
+                if ((r.ot || 0) > 0) details.push(`إضافي 1.5: ${r.ot} س`);
+                if ((r.ot2 || 0) > 0) details.push(`إضافي 2x: ${r.ot2} س`);
+                if ((r.delay || 0) > 0) details.push(`تأخير: ${r.delay} س`);
+                if (withAmt > 0) details.push(`ساحب: ${withAmt}`);
+            } else { 
+                dayTotal = -daily; 
+                details.push(`غياب`); 
+            }
+            let detailsStr = details.length > 0 ? `<div style="margin-top:4px; font-size:11px; color:#475569; line-height:1.5;">${details.join(' | ')}</div>` : '';
             const div = document.createElement('div');
             div.className = 'day-box';
             div.innerHTML = `
-                <div>
+                <div style="flex-grow:1;">
                     <b>${r.date}</b> (${stTxt}) — <span style="color:#4f46e5; font-weight:bold;">${dayTotal.toFixed(2)} ليرة</span>
                     ${detailsStr}
                 </div>
@@ -509,10 +514,12 @@
     }
 
     function deleteRec(idx) {
-        workers[activeIdx].records.splice(idx, 1);
-        saveData();
-        renderRecords();
-        showMsg('تم حذف الحركة من السحابة');
+        if (confirm('هل أنت متأكد من حذف هذه الحركة؟')) {
+            workers[activeIdx].records.splice(idx, 1);
+            saveData();
+            renderRecords();
+            showMsg('تم حذف الحركة من السحابة');
+        }
     }
 
     function showCal() {
@@ -557,10 +564,10 @@
                 selectedDateStr = dKey;
                 document.getElementById('recDate').value = dKey;
                 document.getElementById('recStatus').value = 'present';
-                document.getElementById('recOT').value = '0';
-                document.getElementById('recOT2').value = '0';
-                document.getElementById('recDelay').value = '0';
-                document.getElementById('recWithdrawn').value = '0';
+                document.getElementById('recOT').value = '';
+                document.getElementById('recOT2').value = '';
+                document.getElementById('recDelay').value = '';
+                document.getElementById('recWithdrawn').value = '';
                 toggleExtra();
                 hideCal();
             };
