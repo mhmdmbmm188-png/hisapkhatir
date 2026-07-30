@@ -40,19 +40,11 @@
     <h2>سجل العمال والرواتب</h2>
     <div class="dev">إعداد: محمد المرعي</div>
 
-    <!-- شاشة تسجيل الدخول وإنشاء الحساب -->
-    <div id="authView" style="background:#f8fafc; padding:15px; border-radius:12px; text-align:center; border:1px solid #cbd5e1;">
-        <h3 id="authTitle" style="color:#312e81; margin-bottom:12px; font-size:15px;">تسجيل الدخول للنظام</h3>
-        <div class="input-group">
-            <label>اسم المستخدم</label>
-            <input type="text" id="authUsername" placeholder="اكتب اسمك">
-        </div>
-        <div class="input-group">
-            <label>كلمة المرور</label>
-            <input type="password" id="authPassword" placeholder="اكتب كلمة المرور (6 أحرف على الأقل)">
-        </div>
-        <button type="button" id="authBtn" class="btn btn-primary" onclick="handleAuth()">دخول</button>
-        <button type="button" class="btn btn-secondary" style="background:#64748b; font-size:12px; padding:10px; margin-bottom:0;" onclick="toggleAuthMode()">ليس لديك حساب؟ إنشاء حساب</button>
+    <!-- شاشة تسجيل الدخول عبر جوجل -->
+    <div id="authView" style="background:#f8fafc; padding:20px; border-radius:12px; text-align:center; border:1px solid #cbd5e1;">
+        <h3 style="color:#312e81; margin-bottom:10px; font-size:16px;">تسجيل الدخول للنظام</h3>
+        <p style="font-size:12px; color:#64748b; margin-bottom:15px;">سجل دخولك بحساب جوجل لحفظ بياناتك بشكل آمن دائم.</p>
+        <button type="button" class="btn btn-primary" style="background:#db4437;" onclick="loginWithGoogle()">🔴 تسجيل الدخول بواسطة جوجل</button>
     </div>
 
     <div id="homeView" class="hidden">
@@ -206,7 +198,6 @@
     let activeIdx = null;
     let calDate = new Date();
     let selectedDateStr = new Date().toISOString().split('T')[0];
-    let isSignUpMode = false;
 
     function showMsg(msg) {
         let m = document.getElementById('toastMsg');
@@ -235,36 +226,13 @@
         }
     });
 
-    function toggleAuthMode() {
-        isSignUpMode = !isSignUpMode;
-        document.getElementById('authTitle').innerText = isSignUpMode ? 'إنشاء حساب جديد' : 'تسجيل الدخول للنظام';
-        document.getElementById('authBtn').innerText = isSignUpMode ? 'إنشاء الحساب' : 'دخول';
-        document.querySelector('#authView button:nth-child(5)').innerText = isSignUpMode ? 'لديك حساب؟ تسجيل دخول' : 'ليس لديك حساب؟ إنشاء حساب';
-    }
-
-    function handleAuth() {
-        const userInput = document.getElementById('authUsername').value.trim();
-        const pass = document.getElementById('authPassword').value.trim();
-        if (!userInput || !pass) {
-            showMsg('اكتب اسم المستخدم وكلمة المرور');
-            return;
-        }
-        const encodedName = btoa(unescape(encodeURIComponent(userInput))).replace(/=/g, '');
-        const email = encodedName + '@hisapkhatir.app';
-
-        if (isSignUpMode) {
-            auth.createUserWithEmailAndPassword(email, pass).then(() => {
-                showMsg('تم إنشاء الحساب بنجاح!');
-            }).catch(() => {
-                showMsg('خطأ: كلمة المرور 6 أحرف على الأقل أو الاسم مستخدم');
-            });
-        } else {
-            auth.signInWithEmailAndPassword(email, pass).then(() => {
-                showMsg('تم تسجيل الدخول');
-            }).catch(() => {
-                showMsg('خطأ في الاسم أو كلمة المرور');
-            });
-        }
+    function loginWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).then(() => {
+            showMsg('تم تسجيل الدخول بنجاح');
+        }).catch((error) => {
+            showMsg('فشل تسجيل الدخول: ' + error.message);
+        });
     }
 
     function logoutUser() {
@@ -704,7 +672,7 @@
 
     function copyReport() {
         if (activeIdx === null) return;
-        const text = generateReportText();
+        const text = generateReportTest();
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(() => showMsg('تم النسخ'));
         } else {
