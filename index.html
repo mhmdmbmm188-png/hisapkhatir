@@ -69,8 +69,7 @@
         <div id="workersList"></div>
         <button type="button" class="btn btn-secondary" onclick="logoutUser()" style="background:#dc2626; margin-top:10px;">🚪 تسجيل خروج</button>
     </div>
-
-    <div id="addView" class="hidden">
+        <div id="addView" class="hidden">
         <button type="button" class="btn btn-secondary" onclick="showHome()">⬅ رجوع</button>
         <div class="input-group">
             <label>اسم العامل</label>
@@ -179,6 +178,7 @@
         <div id="calGrid" class="calendar-grid"></div>
     </div>
 </div>
+
 <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDcQOkPejPSlzOxQixqaQFViLO96QRJo8Q",
@@ -248,11 +248,7 @@
 
     function loginWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).then(() => {
-            showMsg('تم تسجيل الدخول بنجاح');
-        }).catch((error) => {
-            showMsg('فشل تسجيل الدخول: ' + error.message);
-        });
+        auth.signInWithRedirect(provider);
     }
 
     function handleEmailAuth() {
@@ -288,9 +284,7 @@
         }).catch((error) => {
             showMsg('خطأ: ' + error.message);
         });
-    }
-
-    function logoutUser() {
+    }    function logoutUser() {
         auth.signOut().then(() => {
             workers = [];
             showMsg('تم تسجيل الخروج');
@@ -736,3 +730,5 @@
 </script>
 </body>
 </html>
+
+    
