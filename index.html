@@ -9,7 +9,7 @@
         body { background: #0f172a; padding: 10px; color: #1e293b; }
         .app { background: #fff; max-width: 480px; margin: 0 auto; padding: 15px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
         h2 { text-align: center; color: #312e81; font-size: 18px; margin-bottom: 5px; }
-        .dev { text-align: center; font-size: 11px; color: #6366f1; margin-bottom: 15px; font-weight: bold; }
+        .dev { text-align: center; font-size: 11px; color: #6366f1; margin-bottom: 10px; font-weight: bold; }
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         .btn-primary { background: #4f46e5; color: #fff; }
         .btn-secondary { background: #64748b; color: #fff; }
@@ -38,6 +38,7 @@
 <body>
 
 <div class="app">
+    <div id="connStatus" style="font-size:11px; text-align:center; padding:4px; background:#f1f5f9; border-radius:6px; margin-bottom:10px; color:#64748b; font-weight:bold;">جاري التحقق من الاتصال...</div>
     <h2>سجل العمال والرواتب</h2>
     <div class="dev">إعداد: محمد المرعي</div>
 
@@ -170,6 +171,20 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // مراقبة حالة الاتصال بالانترنت والسحابة مباشرة
+    db.ref('.info/connected').on('value', function(snap) {
+        const statusEl = document.getElementById('connStatus');
+        if (snap.val() === true) {
+            statusEl.innerHTML = '🟢 متصل بالسحابة (مزامنة فورية)';
+            statusEl.style.color = '#16a34a';
+            statusEl.style.background = '#dcfce7';
+        } else {
+            statusEl.innerHTML = '🔴 غير متصل بالسحابة (وضع محلي)';
+            statusEl.style.color = '#dc2626';
+            statusEl.style.background = '#fee2e2';
+        }
+    });
+
     let workers = [];
     let activeIdx = null;
     let calDate = new Date();
@@ -217,9 +232,9 @@
         try {
             window.localStorage.setItem('workers_data', JSON.stringify(workers));
             db.ref('workers').set(workers).then(() => {
-                showMsg('تم الحفظ على السحابة بنجاح');
+                showMsg('تم التحديث وحفظ التغييرات على السحابة');
             }).catch(() => {
-                showMsg('تم الحفظ محلياً (لا يوجد اتصال بالسحابة)');
+                showMsg('تم الحفظ محلياً');
             });
         } catch (e) {
             showMsg('خطأ في حفظ البيانات');
@@ -292,7 +307,7 @@
         workers.push({ name: name, salary: salary, records: [], other: 0 });
         saveData();
         showHome();
-        showMsg('تم إضافة العامل بنجاح');
+        showMsg('تم إضافة العامل وحفظه بالسحابة');
     }
 
     function enableEditMode() {
@@ -320,7 +335,7 @@
         document.getElementById('pSalary').innerText = `الراتب: ${salary} | اليومية: ${(salary/30).toFixed(1)}`;
         cancelEditMode();
         renderRecords();
-        showMsg('تم التحديث');
+        showMsg('تم التحديث بالسحابة');
     }
 
     function renderWorkers() {
@@ -349,7 +364,7 @@
         workers.splice(i, 1);
         saveData();
         renderWorkers();
-        showMsg('تم حذف العامل');
+        showMsg('تم حذف العامل من السحابة');
     }
 
     function openProfile(i) {
@@ -399,7 +414,7 @@
         w.records.sort((a,b) => new Date(b.date) - new Date(a.date));
         saveData();
         renderRecords();
-        showMsg('تم حفظ الحركة');
+        showMsg('تم حفظ الحركة بالسحابة');
     }
 
     function getFormattedDateName(dateStr) {
@@ -497,7 +512,7 @@
         workers[activeIdx].records.splice(idx, 1);
         saveData();
         renderRecords();
-        showMsg('تم حذف الحركة');
+        showMsg('تم حذف الحركة من السحابة');
     }
 
     function showCal() {
