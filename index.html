@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حساب خاطر - سجل العمال</title>
+    <title>حساب خاطر</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
         body { background: #0f172a; padding: 10px; color: #1e293b; }
@@ -13,7 +13,6 @@
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         .btn-primary { background: #4f46e5; color: #fff; }
         .btn-secondary { background: #64748b; color: #fff; }
-        .btn-warning { background: #f59e0b; color: #fff; }
         .btn-danger { background: #dc2626; color: #fff; padding: 6px 12px; font-size: 11px; border-radius: 6px; }
         .input-group { margin-bottom: 12px; text-align: right; }
         label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #334155; }
@@ -21,15 +20,12 @@
         .worker-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .hidden { display: none !important; }
         .summary { background: #4f46e5; color: #fff; padding: 14px; border-radius: 8px; margin-top: 12px; font-size: 13px; font-weight: bold; white-space: pre-line; line-height: 1.8; }
-        .total-banner { background: #e0e7ff; color: #312e81; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 12px; font-weight: bold; text-align: center; }
         .day-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 13px; line-height: 1.6; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; }
         .cal-day { padding: 8px 0; background: #22c55e; color: #fff; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .cal-day.absent { background: #dc2626; color: #fff; }
         .profile-header { background: #e0e7ff; padding: 12px; border-radius: 8px; margin-bottom: 12px; position: relative; }
         .edit-btn { position: absolute; top: 10px; left: 10px; background: none; border: none; font-size: 16px; cursor: pointer; }
-        .backup-group { display: flex; gap: 5px; margin-bottom: 12px; }
-        .backup-group .btn { margin-bottom: 0; font-size: 12px; padding: 10px; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .modal-box { background: #fff; padding: 20px; border-radius: 12px; width: 90%; max-width: 320px; text-align: right; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
     </style>
@@ -64,7 +60,7 @@
     <div id="forgotModal" class="modal-overlay hidden">
         <div class="modal-box">
             <h3 style="color:#312e81; font-size:15px; margin-bottom:8px;">استعادة كلمة المرور</h3>
-            <p style="font-size:11px; color:#64748b; margin-bottom:12px; line-height:1.6;">أدخل بريدك الإلكتروني المسجل، وستصلك رسالة إعادة التعيين. <b>ملاحظة:</b> إذا لم تجدها في الوارد، يرجى التحقق من قسم البريد غير المرغوب فيه (Spam).</p>
+            <p style="font-size:11px; color:#64748b; margin-bottom:12px; line-height:1.6;">أدخل بريدك الإلكتروني المسجل، وستصلك رسالة إعادة التعيين. <b>ملاحظة:</b> تحقق من قسم Spam إذا لم تجدها.</p>
             <div class="input-group">
                 <label>البريد الإلكتروني</label>
                 <input type="email" id="resetEmail" placeholder="example@domain.com">
@@ -89,16 +85,10 @@
     </div>
 
     <div id="homeView" class="hidden">
-        <div id="totalWorkersBanner" class="total-banner">إجمالي الرواتب الأساسية للعمال: 0 ليرة</div>
         <div class="input-group" style="margin-bottom:8px;">
             <input type="text" id="searchWorkerInput" placeholder="🔍 بحث عن عامل..." oninput="renderWorkers()">
         </div>
         <button type="button" class="btn btn-primary" onclick="showAddWorker()">➕ إضافة عامل جديد</button>
-        <div class="backup-group">
-            <button type="button" class="btn btn-warning" onclick="exportData()">⬇️ حفظ نسخة</button>
-            <button type="button" class="btn btn-secondary" onclick="document.getElementById('importFile').click()">⬆️ استعادة</button>
-            <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
-        </div>
         <div id="workersList"></div>
         <button type="button" class="btn btn-secondary" onclick="logoutUser()" style="background:#dc2626; margin-top:10px;">🚪 تسجيل خروج</button>
     </div>
@@ -115,7 +105,8 @@
         </div>
         <button type="button" class="btn btn-primary" onclick="saveWorker()">💾 حفظ العامل</button>
     </div>
-        <div id="profileView" class="hidden">
+
+    <div id="profileView" class="hidden">
         <button type="button" class="btn btn-secondary" onclick="showHome()">⬅ رجوع للقائمة</button>
         <div class="profile-header">
             <div id="displayWorkerInfo">
@@ -228,7 +219,7 @@
     db.ref('.info/connected').on('value', function(snap) {
         const statusEl = document.getElementById('connStatus');
         if (snap.val() === true) {
-            statusEl.innerHTML = '🟢 متصل بالسحابة (مزامنة فورية)';
+            statusEl.innerHTML = '🟢 متصل بالسحابة';
             statusEl.style.color = '#16a34a';
             statusEl.style.background = '#dcfce7';
         } else {
@@ -308,13 +299,25 @@
             auth.createUserWithEmailAndPassword(email, password).then(() => {
                 showMsg('تم إنشاء الحساب بنجاح');
             }).catch((error) => {
-                showMsg('خطأ: ' + error.message);
+                let msg = 'خطأ في إنشاء الحساب';
+                if (error.code === 'auth/email-already-in-use') {
+                    msg = '⚠️ هذا البريد مسجل بالفعل، يرجى تسجيل الدخول أو استخدام بريد آخر.';
+                } else if (error.code === 'auth/weak-password') {
+                    msg = '⚠️ كلمة المرور ضعيفة جداً (يجب أن تكون 6 أحرف على الأقل).';
+                } else if (error.code === 'auth/invalid-email') {
+                    msg = '⚠️ صيغة البريد الإلكتروني غير صحيحة.';
+                }
+                showMsg(msg);
             });
         } else {
             auth.signInWithEmailAndPassword(email, password).then(() => {
                 showMsg('تم تسجيل الدخول بنجاح');
             }).catch((error) => {
-                showMsg('خطأ: ' + error.message);
+                let msg = 'خطأ في تسجيل الدخول';
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    msg = '⚠️ البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+                }
+                showMsg(msg);
             });
         }
     }
@@ -333,7 +336,7 @@
 
     function submitPasswordReset() {
         if (resetCooldownTime > 0) {
-            showMsg(`الرجاء الانتظار ${resetCooldownTime} ثانية قبل إعادة الإرسال`);
+            showMsg(`الرجاء الانتظار ${resetCooldownTime} ثانية`);
             return;
         }
         const email = document.getElementById('resetEmail').value.trim();
@@ -342,7 +345,7 @@
             return;
         }
         auth.sendPasswordResetEmail(email).then(() => {
-            showMsg('تم إرسال رابط الاستعادة بنجاح. تحقق من قسم Spam');
+            showMsg('تم إرسال رابط الاستعادة. تحقق من قسم Spam');
             closeForgotModal();
             
             resetCooldownTime = 30;
@@ -389,46 +392,7 @@
     function saveData() {
         const user = auth.currentUser;
         if (!user) return;
-        db.ref('users/' + user.uid + '/workers').set(workers).then(() => {
-            showMsg('تم الحفظ');
-        }).catch(() => {
-            showMsg('خطأ في الحفظ');
-        });
-    }
-
-    function exportData() {
-        if (workers.length === 0) {
-            showMsg('لا يوجد عمال');
-            return;
-        }
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(workers));
-        const dlAnchorElem = document.createElement('a');
-        dlAnchorElem.setAttribute("href", dataStr);
-        dlAnchorElem.setAttribute("download", `hisab_backup_${selectedDateStr}.json`);
-        dlAnchorElem.click();
-    }
-
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const imported = JSON.parse(e.target.result);
-                if (Array.isArray(imported)) {
-                    workers = imported;
-                    saveData();
-                    renderWorkers();
-                    showMsg('تم الاستعادة بنجاح!');
-                } else {
-                    showMsg('الملف غير صحيح');
-                }
-            } catch (err) {
-                showMsg('خطأ بقراءة الملف');
-            }
-        };
-        reader.readAsText(file);
-        event.target.value = '';
+        db.ref('users/' + user.uid + '/workers').set(workers);
     }
 
     function showHome() {
@@ -458,7 +422,7 @@
 
         const exists = workers.some(w => w.name.trim().toLowerCase() === name.toLowerCase());
         if (exists) {
-            showMsg('⚠️ هذا العامل موجود مسبقاً في القائمة. يرجى استخدام اسم مختلف أو تعديل حسابه الحالي.');
+            showMsg('⚠️ هذا العامل موجود مسبقاً في القائمة.');
             return;
         }
 
@@ -502,9 +466,6 @@
         
         const searchQuery = (document.getElementById('searchWorkerInput').value || '').toLowerCase();
         const filteredWorkers = workers.filter(w => w.name.toLowerCase().includes(searchQuery));
-        
-        let totalSalaries = workers.reduce((sum, w) => sum + (w.salary || 0), 0);
-        document.getElementById('totalWorkersBanner').innerText = `إجمالي الرواتب الأساسية للعمال: ${totalSalaries} ليرة`;
 
         if (filteredWorkers.length === 0) {
             list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; padding:15px;">لا توجد نتائج مطابقة.</div>';
@@ -581,7 +542,7 @@
             w.other = document.getElementById('recOther').value;
             saveData();
             renderRecords();
-            showMsg('تم الحفظ (دوام عادي)');
+            showMsg('تم الحفظ');
             return;
         }
 
@@ -824,7 +785,7 @@
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(() => showMsg('تم النسخ'));
         } else {
-            showMsg('النسخ التلقائي ما اشتغل');
+            showMsg('النسخ غير متاح');
         }
     }
 </script>
