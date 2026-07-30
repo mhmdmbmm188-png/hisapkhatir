@@ -76,6 +76,18 @@
         </div>
     </div>
 
+    <!-- نافذة التأكيد المخصصة -->
+    <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h3 style="color:#312e81; font-size:15px; margin-bottom:8px;">تنبيه</h3>
+            <p id="confirmText" style="font-size:12px; color:#64748b; margin-bottom:15px; line-height:1.6;"></p>
+            <div style="display:flex; gap:8px;">
+                <button type="button" class="btn btn-danger" id="confirmYesBtn" style="padding:10px; margin-bottom:0;" onclick="executeConfirm()">تأكيد</button>
+                <button type="button" class="btn btn-secondary" style="padding:10px; margin-bottom:0; background:#64748b;" onclick="closeConfirmModal()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <div id="homeView" class="hidden">
         <div id="totalWorkersBanner" class="total-banner">إجمالي الرواتب الأساسية للعمال: 0 ليرة</div>
         <div class="input-group" style="margin-bottom:8px;">
@@ -233,6 +245,7 @@
     let isRegisterMode = false;
     let resetCooldownTime = 0;
     let resetCooldownInterval = null;
+    let confirmCallback = null;
 
     function showMsg(msg) {
         let m = document.getElementById('toastMsg');
@@ -245,6 +258,22 @@
         m.innerText = msg;
         m.style.display = 'block';
         setTimeout(() => m.style.display = 'none', 2500);
+    }
+
+    function showCustomConfirm(text, callback) {
+        document.getElementById('confirmText').innerText = text;
+        confirmCallback = callback;
+        document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+        confirmCallback = null;
+        document.getElementById('confirmModal').classList.add('hidden');
+    }
+
+    function executeConfirm() {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
     }
 
     auth.onAuthStateChanged((user) => {
@@ -421,14 +450,22 @@
     function saveWorker() {
         const name = document.getElementById('workerName').value.trim();
         const salary = parseFloat(document.getElementById('workerSalary').value) || 0;
+        
         if (!name || salary <= 0) {
-            showMsg('اكتب الاسم والراتب');
+            showMsg('الرجاء إدخال اسم العامل وراتب صحيح');
             return;
         }
+
+        const exists = workers.some(w => w.name.trim().toLowerCase() === name.toLowerCase());
+        if (exists) {
+            showMsg('⚠️ هذا العامل موجود مسبقاً في القائمة. يرجى استخدام اسم مختلف أو تعديل حسابه الحالي.');
+            return;
+        }
+
         workers.push({ name: name, salary: salary, records: [], other: '' });
         saveData();
         showHome();
-        showMsg('تم إضافة العامل');
+        showMsg('تم إضافة العامل بنجاح');
     }
 
     function enableEditMode() {
@@ -491,12 +528,12 @@
 
     function deleteWorker(e, i) {
         e.stopPropagation();
-        if (confirm('هل أنت متأكد من حذف هذا العامل؟')) {
+        showCustomConfirm('هل أنت متأكد من حذف هذا العامل نهائياً؟', () => {
             workers.splice(i, 1);
             saveData();
             renderWorkers();
             showMsg('تم الحذف');
-        }
+        });
     }
 
     function openProfile(i) {
@@ -714,12 +751,12 @@
     }
 
     function deleteRec(idx) {
-        if (confirm('هل أنت متأكد من حذف هذه الحركة؟')) {
+        showCustomConfirm('هل أنت متأكد من حذف هذه الحركة؟', () => {
             workers[activeIdx].records.splice(idx, 1);
             saveData();
             renderRecords();
             showMsg('تم الحذف');
-        }
+        });
     }
 
     function showCal() {
