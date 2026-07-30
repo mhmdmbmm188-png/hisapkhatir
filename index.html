@@ -40,10 +40,10 @@
 
     <!-- واجهة الرئيسية -->
     <div id="homeView">
-        <button class="btn btn-primary" onclick="showAddWorker()">➕ إضافة عامل جديد</button>
+        <button type="button" class="btn btn-primary" onclick="showAddWorker()">➕ إضافة عامل جديد</button>
         <div class="backup-group">
-            <button class="btn btn-warning" onclick="exportData()">⬇️ حفظ نسخة لجهازي</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">⬆️ استعادة</button>
+            <button type="button" class="btn btn-warning" onclick="exportData()">⬇️ حفظ نسخة لجهازي</button>
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('importFile').click()">⬆️ استعادة</button>
             <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
         </div>
         <div id="workersList"></div>
@@ -51,7 +51,7 @@
 
     <!-- إضافة عامل -->
     <div id="addView" class="hidden">
-        <button class="btn btn-secondary" onclick="showHome()">⬅ رجوع</button>
+        <button type="button" class="btn btn-secondary" onclick="showHome()">⬅ رجوع</button>
         <div class="input-group">
             <label>اسم العامل</label>
             <input type="text" id="workerName" placeholder="أدخل الاسم">
@@ -60,18 +60,18 @@
             <label>الراتب الشهري</label>
             <input type="number" id="workerSalary" placeholder="أدخل الراتب">
         </div>
-        <button class="btn btn-primary" onclick="saveWorker()">💾 حفظ العامل</button>
+        <button type="button" class="btn btn-primary" onclick="saveWorker()">💾 حفظ العامل</button>
     </div>
 
     <!-- ملف العامل -->
     <div id="profileView" class="hidden">
-        <button class="btn btn-secondary" onclick="showHome()">⬅ رجوع للقائمة</button>
+        <button type="button" class="btn btn-secondary" onclick="showHome()">⬅ رجوع للقائمة</button>
         
         <div class="profile-header">
             <div id="displayWorkerInfo">
                 <div id="pName" style="font-weight:bold; color:#312e81; font-size:15px; text-align:center;"></div>
                 <div id="pSalary" style="font-size:12px; color:#4338ca; text-align:center;"></div>
-                <button class="edit-btn" onclick="enableEditMode()">✏️</button>
+                <button type="button" class="edit-btn" onclick="enableEditMode()">✏️</button>
             </div>
             
             <div id="editWorkerInfo" class="hidden">
@@ -83,8 +83,8 @@
                     <label>الراتب الشهري</label>
                     <input type="number" id="editWorkerSalary">
                 </div>
-                <button class="btn btn-primary" style="padding:6px; font-size:12px; margin-bottom:5px;" onclick="updateWorkerInfo()">💾 تحديث بيانات العامل</button>
-                <button class="btn btn-secondary" style="padding:6px; font-size:12px; margin-bottom:0;" onclick="cancelEditMode()">❌ إلغاء</button>
+                <button type="button" class="btn btn-primary" style="padding:6px; font-size:12px; margin-bottom:5px;" onclick="updateWorkerInfo()">💾 تحديث بيانات العامل</button>
+                <button type="button" class="btn btn-secondary" style="padding:6px; font-size:12px; margin-bottom:0;" onclick="cancelEditMode()">❌ إلغاء</button>
             </div>
         </div>
 
@@ -125,22 +125,22 @@
             <input type="number" id="recOther" value="0">
         </div>
 
-        <button class="btn btn-primary" onclick="saveRecord()">💾 حفظ الحركة</button>
+        <button type="button" class="btn btn-primary" onclick="saveRecord()">💾 حفظ الحركة</button>
 
         <div style="margin-top:15px; font-weight:bold; font-size:13px;">السجل اليومي:</div>
         <div id="recordsList" style="max-height:180px; overflow-y:auto; margin-top:5px;"></div>
 
         <div class="summary" id="summaryBox"></div>
-        <button class="btn btn-primary" style="background:#10b981; margin-top:10px;" onclick="copyReport()">📋 نسخ التقرير</button>
+        <button type="button" class="btn btn-primary" style="background:#10b981; margin-top:10px;" onclick="copyReport()">📋 نسخ التقرير</button>
     </div>
 
     <!-- التقويم -->
     <div id="calView" class="hidden">
-        <button class="btn btn-secondary" onclick="hideCal()">⬅ رجوع</button>
+        <button type="button" class="btn btn-secondary" onclick="hideCal()">⬅ رجوع</button>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <button class="btn btn-secondary" style="width:auto; padding:5px 10px;" onclick="changeMonth(-1)">▶</button>
+            <button type="button" class="btn btn-secondary" style="width:auto; padding:5px 10px;" onclick="changeMonth(-1)">▶</button>
             <span id="calTitle" style="font-weight:bold; color:#312e81;"></span>
-            <button class="btn btn-secondary" style="width:auto; padding:5px 10px;" onclick="changeMonth(1)">◀</button>
+            <button type="button" class="btn btn-secondary" style="width:auto; padding:5px 10px;" onclick="changeMonth(1)">◀</button>
         </div>
         <div class="calendar-grid">
             <div style="font-size:11px; font-weight:bold; color:#64748b;">أحد</div>
@@ -161,7 +161,6 @@
     let calDate = new Date();
     let selectedDateStr = new Date().toISOString().split('T')[0];
 
-    // دالة الإشعارات الجديدة بدل alert
     function showMsg(msg) {
         let m = document.getElementById('toastMsg');
         if(!m) {
@@ -184,9 +183,7 @@
                     if (Array.isArray(parsed)) workers = parsed;
                 }
             }
-        } catch (e) {
-            // تجاهل خطأ الذاكرة بصمت
-        }
+        } catch (e) {}
         document.getElementById('recDate').value = selectedDateStr;
         renderWorkers();
     };
@@ -253,12 +250,17 @@
     }
 
     function saveWorker() {
-        const name = document.getElementById('workerName').value.trim();
-        const salary = parseFloat(document.getElementById('workerSalary').value) || 0;
+        const nameField = document.getElementById('workerName');
+        const salaryField = document.getElementById('workerSalary');
+        
+        const name = nameField.value.trim();
+        const salary = parseFloat(salaryField.value) || 0;
+        
         if (!name || salary <= 0) {
             showMsg('اكتب الاسم والراتب بشكل صحيح');
             return;
         }
+        
         workers.push({ name: name, salary: salary, records: [], other: 0 });
         saveData();
         showHome();
@@ -308,7 +310,7 @@
                     <div style="font-weight:bold;">👤 ${w.name}</div>
                     <div style="font-size:11px; color:#64748b;">الراتب: ${w.salary}</div>
                 </div>
-                <button class="btn-danger" onclick="deleteWorker(event, ${i})">حذف</button>
+                <button type="button" class="btn-danger" onclick="deleteWorker(event, ${i})">حذف</button>
             `;
             list.appendChild(div);
         });
@@ -422,10 +424,4 @@
     }
 
     function renderRecords() {
-        const list = document.getElementById('recordsList');
-        const summary = document.getElementById('summaryBox');
-        list.innerHTML = '';
-        const w = workers[activeIdx];
-        const recs = w.records || [];
-        
-        if (r
+        const list = do
