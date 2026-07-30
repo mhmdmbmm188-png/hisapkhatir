@@ -19,13 +19,12 @@
         input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #f8fafc; }
         .worker-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .hidden { display: none !important; }
-        .summary { background: #4f46e5; color: #fff; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 13px; font-weight: bold; }
+        .summary { background: #4f46e5; color: #fff; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 12px; font-weight: bold; white-space: pre-line; line-height: 1.6; }
         .day-box { background: #f1f5f9; padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; }
         .cal-day { padding: 8px 0; background: #f1f5f9; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .cal-day.present { background: #22c55e; color: #fff; }
         .cal-day.absent { background: #dc2626; color: #fff; }
-        .cal-day.weekend { background: #64748b; color: #fff; }
     </style>
 </head>
 <body>
@@ -72,7 +71,6 @@
             <select id="recStatus" onchange="toggleExtra()">
                 <option value="present">داوم (كامل)</option>
                 <option value="absent">غائب</option>
-                <option value="weekend">عطلة</option>
             </select>
         </div>
 
@@ -93,6 +91,11 @@
                 <label>مبلغ مسحوب (سلفية)</label>
                 <input type="number" id="recWithdrawn" value="0">
             </div>
+        </div>
+
+        <div class="input-group">
+            <label>آخر (ضل من حساب القديم / إضافي عام)</label>
+            <input type="number" id="recOther" value="0">
         </div>
 
         <button class="btn btn-primary" onclick="saveRecord()">💾 حفظ الحركة</button>
@@ -163,7 +166,7 @@
             alert('الرجاء إدخال الاسم بشكل صحيح وراتب أكبر من الصفر');
             return;
         }
-        workers.push({ name: name, salary: salary, records: [] });
+        workers.push({ name: name, salary: salary, records: [], other: 0 });
         saveData();
         showHome();
     }
@@ -203,6 +206,7 @@
         const w = workers[i];
         document.getElementById('pName').innerText = w.name;
         document.getElementById('pSalary').innerText = `الراتب الشهري: ${w.salary} | اليومية: ${(w.salary/30).toFixed(1)}`;
+        document.getElementById('recOther').value = w.other || 0;
         document.getElementById('homeView').classList.add('hidden');
         document.getElementById('profileView').classList.remove('hidden');
         renderRecords();
@@ -211,7 +215,7 @@
     function toggleExtra() {
         const s = document.getElementById('recStatus').value;
         const extra = document.getElementById('extraContainer');
-        if (s === 'absent' || s === 'weekend') extra.classList.add('hidden');
+        if (s === 'absent') extra.classList.add('hidden');
         else extra.classList.remove('hidden');
     }
 
@@ -226,15 +230,87 @@
         w.records.push({
             date: date,
             status: status,
-            ot: status === 'absent' || status === 'weekend' ? 0 : parseFloat(document.getElementById('recOT').value) || 0,
-            ot2: status === 'absent' || status === 'weekend' ? 0 : parseFloat(document.getElementById('recOT2').value) || 0,
-            delay: status === 'absent' || status === 'weekend' ? 0 : parseFloat(document.getElementById('recDelay').value) || 0,
+            ot: status === 'absent' ? 0 : parseFloat(document.getElementById('recOT').value) || 0,
+            ot2: status === 'absent' ? 0 : parseFloat(document.getElementById('recOT2').value) || 0,
+            delay: status === 'absent' ? 0 : parseFloat(document.getElementById('recDelay').value) || 0,
             withdrawn: parseFloat(document.getElementById('recWithdrawn').value) || 0
         });
+        w.other = parseFloat(document.getElementById('recOther').value) || 0;
         w.records.sort((a,b) => new Date(b.date) - new Date(a.date));
         saveData();
         renderRecords();
         alert('تم الحفظ بنجاح');
+    }
+
+    function getFormattedDateName(dateStr) {
+        const daysArr = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        const d = new Date(dateStr);
+        const dayName = daysArr[d.getDay()];
+        const parts = dateStr.split('-');
+        const formatted = `${parts[2]}.${parts[1]}.${parts[0]}`;
+        return `يوم ${dayName} ${formatted}`;
+    }
+
+    function generateReportText() {
+        const w = workers[activeIdx];
+        const recs = w.records || [];
+        
+        let days = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0, absentTot = 0;
+        let delayDates = [], absentDates = [];
+
+        recs.forEach(r => {
+            if (r.status === 'present') {
+                days++;
+                if ((r.delay || 0) > 0) {
+                    delayTot += r.delay;
+                    delayDates.push(getFormattedDateName(r.date));
+                }
+            } else if (r.status === 'absent') {
+                absentTot++;
+                absentDates.push(getFormattedDateName(r.date));
+            }
+            otTot += (r.ot || 0);
+            ot2Tot += (r.ot2 || 0);
+            withTot += (r.withdrawn || 0);
+        });
+
+        const daily = w.salary / 30;
+        const hourly = daily / 9;
+        
+        const earnedDays = days * daily;
+        const earnedOt = otTot * hourly * 1.5;
+        const earnedOt2 = ot2Tot * hourly * 2;
+        const cutDelay = delayTot * hourly;
+        const cutAbsence = absentTot * daily;
+        const otherVal = w.other || 0;
+
+        const net = earnedDays + earnedOt + earnedOt2 - cutDelay - cutAbsence - withTot + otherVal;
+
+        let txt = `📊 تقرير تفاصيل الراتب\n`;
+        txt += `👤 اسم العامل: ${w.name}\n`;
+        txt += `💰 الراتب الشهري: ${w.salary} ليرة\n`;
+        txt += `-------------------\n`;
+        txt += `📅 كم يوم مداوم (${days} يوم): ${earnedDays.toFixed(2)} ليرة\n`;
+        if (otTot > 0) txt += `➕ إضافي (1.5x) (${otTot} ساعة): +${earnedOt.toFixed(2)} ليرة\n`;
+        if (ot2Tot > 0) txt += `➕ إضافي (2x) (${ot2Tot} ساعة): +${earnedOt2.toFixed(2)} ليرة\n`;
+        if (delayTot > 0) {
+            txt += `➖ التأخير (${delayTot} ساعة): -${cutDelay.toFixed(2)} ليرة\n`;
+            txt += `   📌 تواريخ التأخير: ${delayDates.join(' - ')}\n`;
+        }
+        if (absentTot > 0) {
+            txt += `➖ الغياب (${absentTot} يوم): -${cutAbsence.toFixed(2)} ليرة\n`;
+            txt += `   📌 تواريخ الغياب: ${absentDates.join(' - ')}\n`;
+        }
+        if (withTot > 0) {
+            txt += `➖ ساحب: -${withTot.toFixed(2)} ليرة\n`;
+        }
+        if (otherVal !== 0) {
+            txt += `➕ آخر (ضل من حساب القديم): ${otherVal > 0 ? '+' : ''}${otherVal.toFixed(2)} ليرة\n`;
+        }
+        txt += `-------------------\n`;
+        txt += `💰 المجموع الكامل: ${net.toFixed(2)} ليرة`;
+
+        return txt;
     }
 
     function renderRecords() {
@@ -243,21 +319,15 @@
         list.innerHTML = '';
         const w = workers[activeIdx];
         const recs = w.records || [];
-        if (recs.length === 0) {
+        
+        if (recs.length === 0 && (!w.other || w.other === 0)) {
             list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px;">لا توجد حركات.</div>';
-            summary.innerHTML = 'الصافي: 0';
+            summary.innerHTML = 'المجموع الكامل: 0.00 ليرة';
             return;
         }
 
-        let days = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
         recs.forEach((r, idx) => {
-            if (r.status === 'present') days++;
-            otTot += (r.ot || 0);
-            ot2Tot += (r.ot2 || 0);
-            delayTot += (r.delay || 0);
-            withTot += (r.withdrawn || 0);
-
-            let stTxt = r.status === 'present' ? 'داوم' : (r.status === 'absent' ? 'غائب' : 'عطلة');
+            let stTxt = r.status === 'present' ? 'داوم' : 'غائب';
             const div = document.createElement('div');
             div.className = 'day-box';
             div.innerHTML = `
@@ -267,14 +337,7 @@
             list.appendChild(div);
         });
 
-        const daily = w.salary / 30;
-        const hourly = daily / 9;
-        const earned = days * daily;
-        const otEarn = (otTot * hourly * 1.5) + (ot2Tot * hourly * 2);
-        const delayCut = delayTot * hourly;
-        const net = earned + otEarn - delayCut - withTot;
-
-        summary.innerHTML = `أيام الدوام: ${days} | الإضافي: +${otEarn.toFixed(1)} | التأخير: -${delayCut.toFixed(1)} | السلف: -${withTot.toFixed(1)}<br>الصافي النهائي: ${net.toFixed(1)} ليرة`;
+        summary.innerText = generateReportText();
     }
 
     function deleteRec(idx) {
@@ -316,8 +379,7 @@
         }
 
         for (let i = 0; i < firstDay; i++) {
-            const empty = document.createElement('div');
-            grid.appendChild(empty);
+            grid.appendChild(document.createElement('div'));
         }
 
         for (let d = 1; d <= totalDays; d++) {
@@ -349,23 +411,9 @@
 
     function copyReport() {
         if (activeIdx === null) return;
-        const w = workers[activeIdx];
-        const recs = w.records || [];
-        let days = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
-        recs.forEach(r => {
-            if (r.status === 'present') days++;
-            otTot += (r.ot || 0);
-            ot2Tot += (r.ot2 || 0);
-            delayTot += (r.delay || 0);
-            withTot += (r.withdrawn || 0);
-        });
-        const daily = w.salary / 30;
-        const hourly = daily / 9;
-        const net = (days * daily) + (otTot * hourly * 1.5) + (ot2Tot * hourly * 2) - (delayTot * hourly) - withTot;
-
-        const text = `كشف حساب: ${w.name}\nالراتب الأساسي: ${w.salary}\nأيام الدوام: ${days}\nالصافي المستحق: ${net.toFixed(1)} ليرة`;
+        const text = generateReportText();
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => alert('تم النسخ'));
+            navigator.clipboard.writeText(text).then(() => alert('تم نسخ التقرير بنجاح'));
         } else {
             alert(text);
         }
