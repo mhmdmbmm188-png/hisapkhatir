@@ -32,6 +32,7 @@
     </style>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 <div class="app">
@@ -39,25 +40,41 @@
     <h2>سجل العمال والرواتب</h2>
     <div class="dev">إعداد: محمد المرعي</div>
 
-    <div id="homeView">
+    <!-- شاشة تسجيل الدخول وإنشاء الحساب -->
+    <div id="authView" style="background:#f8fafc; padding:15px; border-radius:12px; text-align:center; border:1px solid #cbd5e1;">
+        <h3 id="authTitle" style="color:#312e81; margin-bottom:12px; font-size:15px;">تسجيل الدخول للنظام</h3>
+        <div class="input-group">
+            <label>اسم المستخدم</label>
+            <input type="text" id="authUsername" placeholder="اكتب اسمك">
+        </div>
+        <div class="input-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="authPassword" placeholder="اكتب كلمة المرور">
+        </div>
+        <button type="button" id="authBtn" class="btn btn-primary" onclick="handleAuth()">دخول</button>
+        <button type="button" class="btn btn-secondary" style="background:#64748b; font-size:12px; padding:10px; margin-bottom:0;" onclick="toggleAuthMode()">ليس لديك حساب؟ إنشاء حساب</button>
+    </div>
+
+    <div id="homeView" class="hidden">
         <button type="button" class="btn btn-primary" onclick="showAddWorker()">➕ إضافة عامل جديد</button>
         <div class="backup-group">
-            <button type="button" class="btn btn-warning" onclick="exportData()">⬇️ حفظ نسخة لجهازي</button>
+            <button type="button" class="btn btn-warning" onclick="exportData()">⬇️ حفظ نسخة</button>
             <button type="button" class="btn btn-secondary" onclick="document.getElementById('importFile').click()">⬆️ استعادة</button>
             <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
         </div>
         <div id="workersList"></div>
+        <button type="button" class="btn btn-secondary" onclick="logoutUser()" style="background:#dc2626; margin-top:10px;">🚪 تسجيل خروج</button>
     </div>
 
     <div id="addView" class="hidden">
         <button type="button" class="btn btn-secondary" onclick="showHome()">⬅ رجوع</button>
         <div class="input-group">
             <label>اسم العامل</label>
-            <input type="text" id="workerName" placeholder="">
+            <input type="text" id="workerName">
         </div>
         <div class="input-group">
             <label>الراتب الشهري</label>
-            <input type="number" id="workerSalary" placeholder="">
+            <input type="number" id="workerSalary">
         </div>
         <button type="button" class="btn btn-primary" onclick="saveWorker()">💾 حفظ العامل</button>
     </div>
@@ -79,7 +96,7 @@
                     <label>الراتب الشهري</label>
                     <input type="number" id="editWorkerSalary">
                 </div>
-                <button type="button" class="btn btn-primary" style="padding:8px; font-size:12px; margin-bottom:6px;" onclick="updateWorkerInfo()">💾 تحديث بيانات العامل</button>
+                <button type="button" class="btn btn-primary" style="padding:8px; font-size:12px; margin-bottom:6px;" onclick="updateWorkerInfo()">💾 تحديث</button>
                 <button type="button" class="btn btn-secondary" style="padding:8px; font-size:12px; margin-bottom:0;" onclick="cancelEditMode()">❌ إلغاء</button>
             </div>
         </div>
@@ -88,8 +105,8 @@
             <label>فترة الحساب</label>
             <select id="calcPeriod" onchange="renderRecords()">
                 <option value="all">الشهر كامل (30 يوم)</option>
-                <option value="p1">النصف الأول (من 1 إلى 15)</option>
-                <option value="p2">النصف الثاني (من 16 إلى نهاية الشهر)</option>
+                <option value="p1">النصف الأول (1 إلى 15)</option>
+                <option value="p2">النصف الثاني (16 إلى 30)</option>
             </select>
         </div>
 
@@ -109,19 +126,19 @@
         <div id="extraContainer">
             <div class="input-group">
                 <label>ساعات الإضافي (1.5x)</label>
-                <input type="number" id="recOT" placeholder="">
+                <input type="number" id="recOT">
             </div>
             <div class="input-group">
                 <label>ساعات الإضافي (2x)</label>
-                <input type="number" id="recOT2" placeholder="">
+                <input type="number" id="recOT2">
             </div>
             <div class="input-group">
                 <label>ساعات التأخير</label>
-                <input type="number" id="recDelay" placeholder="">
+                <input type="number" id="recDelay">
             </div>
             <div class="input-group">
                 <label>مبلغ مسحوب (سلفية)</label>
-                <input type="number" id="recWithdrawn" placeholder="">
+                <input type="number" id="recWithdrawn">
             </div>
         </div>
 
@@ -170,6 +187,7 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const auth = firebase.auth();
 
     db.ref('.info/connected').on('value', function(snap) {
         const statusEl = document.getElementById('connStatus');
@@ -178,7 +196,7 @@
             statusEl.style.color = '#16a34a';
             statusEl.style.background = '#dcfce7';
         } else {
-            statusEl.innerHTML = '🔴 غير متصل بالسحابة (وضع محلي)';
+            statusEl.innerHTML = '🔴 غير متصل بالسحابة';
             statusEl.style.color = '#dc2626';
             statusEl.style.background = '#fee2e2';
         }
@@ -188,6 +206,7 @@
     let activeIdx = null;
     let calDate = new Date();
     let selectedDateStr = new Date().toISOString().split('T')[0];
+    let isSignUpMode = false;
 
     function showMsg(msg) {
         let m = document.getElementById('toastMsg');
@@ -202,47 +221,83 @@
         setTimeout(() => m.style.display = 'none', 2500);
     }
 
-    window.onload = function() {
-        db.ref('workers').once('value').then((snapshot) => {
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            document.getElementById('authView').classList.add('hidden');
+            document.getElementById('homeView').classList.remove('hidden');
+            loadUserData(user.uid);
+        } else {
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('profileView').classList.add('hidden');
+            document.getElementById('addView').classList.add('hidden');
+            document.getElementById('calView').classList.add('hidden');
+            document.getElementById('authView').classList.remove('hidden');
+        }
+    });
+
+    function toggleAuthMode() {
+        isSignUpMode = !isSignUpMode;
+        document.getElementById('authTitle').innerText = isSignUpMode ? 'إنشاء حساب جديد' : 'تسجيل الدخول للنظام';
+        document.getElementById('authBtn').innerText = isSignUpMode ? 'إنشاء الحساب' : 'دخول';
+        document.querySelector('#authView button:nth-child(5)').innerText = isSignUpMode ? 'لديك حساب؟ تسجيل دخول' : 'ليس لديك حساب؟ إنشاء حساب';
+    }
+
+    function handleAuth() {
+        const userInput = document.getElementById('authUsername').value.trim();
+        const pass = document.getElementById('authPassword').value.trim();
+        if (!userInput || !pass) {
+            showMsg('اكتب اسم المستخدم وكلمة المرور');
+            return;
+        }
+        const email = userInput.toLowerCase().replace(/[^a-z0-9]/g, '_') + '@hisapkhatir.app';
+
+        if (isSignUpMode) {
+            auth.createUserWithEmailAndPassword(email, pass).then(() => {
+                showMsg('تم إنشاء الحساب بنجاح!');
+            }).catch(() => {
+                showMsg('خطأ: الاسم مستخدم مسبقاً أو كلمة المرور ضعيفة');
+            });
+        } else {
+            auth.signInWithEmailAndPassword(email, pass).then(() => {
+                showMsg('تم تسجيل الدخول');
+            }).catch(() => {
+                showMsg('خطأ في الاسم أو كلمة المرور');
+            });
+        }
+    }
+
+    function logoutUser() {
+        auth.signOut().then(() => {
+            workers = [];
+            showMsg('تم تسجيل الخروج');
+        });
+    }
+
+    function loadUserData(uid) {
+        db.ref('users/' + uid + '/workers').once('value').then((snapshot) => {
             const data = snapshot.val();
-            if (data && Array.isArray(data)) {
-                workers = data;
-            } else {
-                let stored = window.localStorage.getItem('workers_data');
-                if (stored) {
-                    let parsed = JSON.parse(stored);
-                    if (Array.isArray(parsed)) workers = parsed;
-                }
-            }
+            workers = (data && Array.isArray(data)) ? data : [];
             document.getElementById('recDate').value = selectedDateStr;
             renderWorkers();
         }).catch(() => {
-            let stored = window.localStorage.getItem('workers_data');
-            if (stored) {
-                let parsed = JSON.parse(stored);
-                if (Array.isArray(parsed)) workers = parsed;
-            }
-            document.getElementById('recDate').value = selectedDateStr;
+            workers = [];
             renderWorkers();
         });
-    };
+    }
 
     function saveData() {
-        try {
-            window.localStorage.setItem('workers_data', JSON.stringify(workers));
-            db.ref('workers').set(workers).then(() => {
-                showMsg('تم الحفظ على السحابة');
-            }).catch(() => {
-                showMsg('تم الحفظ محلياً');
-            });
-        } catch (e) {
-            showMsg('خطأ في حفظ البيانات');
-        }
+        const user = auth.currentUser;
+        if (!user) return;
+        db.ref('users/' + user.uid + '/workers').set(workers).then(() => {
+            showMsg('تم الحفظ');
+        }).catch(() => {
+            showMsg('خطأ في الحفظ');
+        });
     }
 
     function exportData() {
         if (workers.length === 0) {
-            showMsg('لا يوجد عمال لحفظهم');
+            showMsg('لا يوجد عمال');
             return;
         }
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(workers));
@@ -292,10 +347,8 @@
     }
 
     function saveWorker() {
-        const nameField = document.getElementById('workerName');
-        const salaryField = document.getElementById('workerSalary');
-        const name = nameField.value.trim();
-        const salary = parseFloat(salaryField.value) || 0;
+        const name = document.getElementById('workerName').value.trim();
+        const salary = parseFloat(document.getElementById('workerSalary').value) || 0;
         if (!name || salary <= 0) {
             showMsg('اكتب الاسم والراتب');
             return;
@@ -410,7 +463,7 @@
             w.other = document.getElementById('recOther').value;
             saveData();
             renderRecords();
-            showMsg('تم الحفظ (يوم دوام عادي)');
+            showMsg('تم الحفظ (دوام عادي)');
             return;
         }
 
@@ -545,7 +598,7 @@
         const filteredRecs = getFilteredRecords();
         
         if (filteredRecs.length === 0 && (!w.other || w.other.trim() === '' || period !== 'all')) {
-            list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px;">لا توجد حركات مسجلة في هذه الفترة (دوام كامل).</div>';
+            list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:11px;">لا توجد حركات مسجلة.</div>';
             summary.innerHTML = generateReportText();
             return;
         }
