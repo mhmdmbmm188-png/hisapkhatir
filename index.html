@@ -13,14 +13,15 @@
         .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         .btn-primary { background: #4f46e5; color: #fff; }
         .btn-secondary { background: #64748b; color: #fff; }
-        .btn-danger { background: #dc2626; color: #fff; padding: 6px 12px; font-size: 11px; border-radius: 6px; }
+        .btn-danger { background: #dc2626; color: #fff; padding: 6px 12px; font-size: 11px; border-radius: 6px; border: none; cursor: pointer; }
+        .btn-edit { background: #3b82f6; color: #fff; padding: 6px 12px; font-size: 11px; border-radius: 6px; border: none; cursor: pointer; }
         .input-group { margin-bottom: 12px; text-align: right; }
         label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #334155; }
         input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: #f8fafc; }
         .worker-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .hidden { display: none !important; }
         .summary { background: #4f46e5; color: #fff; padding: 14px; border-radius: 8px; margin-top: 12px; font-size: 13px; font-weight: bold; white-space: pre-line; line-height: 1.8; }
-        .day-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; font-size: 13px; line-height: 1.6; }
+        .day-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; line-height: 1.6; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; }
         .cal-day { padding: 8px 0; background: #22c55e; color: #fff; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .cal-day.absent { background: #dc2626; color: #fff; }
@@ -201,8 +202,8 @@
         </div>
         <div id="calGrid" class="calendar-grid"></div>
     </div>
-</div>
-<script>
+            </div>
+    <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDcQOkPejPSlzOxQixqaQFViLO96QRJo8Q",
       authDomain: "hisapkhatir.firebaseapp.com",
@@ -237,6 +238,7 @@
     let resetCooldownTime = 0;
     let resetCooldownInterval = null;
     let confirmCallback = null;
+    let editingDateState = null;
 
     function showMsg(msg) {
         let m = document.getElementById('toastMsg');
@@ -397,6 +399,7 @@
 
     function showHome() {
         activeIdx = null;
+        editingDateState = null;
         document.getElementById('addView').classList.add('hidden');
         document.getElementById('profileView').classList.add('hidden');
         document.getElementById('calView').classList.add('hidden');
@@ -499,6 +502,7 @@
 
     function openProfile(i) {
         activeIdx = i;
+        editingDateState = null;
         const w = workers[i];
         document.getElementById('pName').innerText = w.name;
         document.getElementById('pSalary').innerText = `الراتب: ${w.salary} | اليومية: ${(w.salary/30).toFixed(1)}`;
@@ -532,19 +536,17 @@
         const date = document.getElementById('recDate').value;
         const status = document.getElementById('recStatus').value;
 
+        const existingIdx = w.records.findIndex(item => item.date === date);
+        if (existingIdx !== -1 && date !== editingDateState) {
+            showMsg('هذا اليوم قمت بإضافته من قبل');
+            return;
+        }
+
         w.records = w.records.filter(r => r.date !== date);
         const ot = parseFloat(document.getElementById('recOT').value) || 0;
         const ot2 = parseFloat(document.getElementById('recOT2').value) || 0;
         const delay = parseFloat(document.getElementById('recDelay').value) || 0;
         const withdrawn = parseFloat(document.getElementById('recWithdrawn').value) || 0;
-
-        if (status === 'present' && ot === 0 && ot2 === 0 && delay === 0 && withdrawn === 0) {
-            w.other = document.getElementById('recOther').value;
-            saveData();
-            renderRecords();
-            showMsg('تم الحفظ');
-            return;
-        }
 
         w.records.push({
             date: date,
@@ -556,9 +558,24 @@
         });
         w.other = document.getElementById('recOther').value;
         w.records.sort((a,b) => new Date(b.date) - new Date(a.date));
+        editingDateState = null;
         saveData();
         renderRecords();
         showMsg('تم الحفظ');
+    }
+
+    function editRecord(idx) {
+        const w = workers[activeIdx];
+        const r = w.records[idx];
+        editingDateState = r.date;
+        document.getElementById('recDate').value = r.date;
+        document.getElementById('recStatus').value = r.status;
+        document.getElementById('recOT').value = r.ot || '';
+        document.getElementById('recOT2').value = r.ot2 || '';
+        document.getElementById('recDelay').value = r.delay || '';
+        document.getElementById('recWithdrawn').value = r.withdrawn || '';
+        toggleExtra();
+        showMsg('تم تحميل الحركة للتعديل');
     }
 
     function getFormattedDateName(dateStr) {
@@ -704,7 +721,10 @@
                     <b>${r.date}</b> (${stTxt})
                     ${detailsStr}
                 </div>
-                <button type="button" class="btn-danger" onclick="deleteRec(${realIdx})">حذف</button>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <button type="button" class="btn-edit" onclick="editRecord(${realIdx})">✏️ تعديل</button>
+                    <button type="button" class="btn-danger" onclick="deleteRec(${realIdx})">حذف</button>
+                </div>
             `;
             list.appendChild(div);
         });
@@ -771,6 +791,7 @@
                 document.getElementById('recOT2').value = '';
                 document.getElementById('recDelay').value = '';
                 document.getElementById('recWithdrawn').value = '';
+                editingDateState = null;
                 toggleExtra();
                 hideCal();
                 renderRecords();
