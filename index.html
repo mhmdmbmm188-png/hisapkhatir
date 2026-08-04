@@ -21,10 +21,12 @@
         .worker-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .hidden { display: none !important; }
         .summary { background: #4f46e5; color: #fff; padding: 14px; border-radius: 8px; margin-top: 12px; font-size: 13px; font-weight: bold; white-space: pre-line; line-height: 1.8; }
+        .global-summary { background: #1e1b4b; color: #fff; padding: 14px; border-radius: 10px; margin-bottom: 15px; font-size: 13px; line-height: 1.8; text-align: center; border: 1px solid #4f46e5; }
         .day-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; line-height: 1.6; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; }
         .cal-day { padding: 8px 0; background: #22c55e; color: #fff; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .cal-day.absent { background: #dc2626; color: #fff; }
+        .cal-day.evening { background: #f59e0b; color: #fff; }
         .profile-header { background: #e0e7ff; padding: 12px; border-radius: 8px; margin-bottom: 12px; position: relative; }
         .edit-btn { position: absolute; top: 10px; left: 10px; background: none; border: none; font-size: 16px; cursor: pointer; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; }
@@ -43,7 +45,6 @@
     <!-- شاشة تسجيل الدخول -->
     <div id="authView" style="background:#f8fafc; padding:20px; border-radius:12px; text-align:center; border:1px solid #cbd5e1;">
         <h3 id="authTitle" style="color:#312e81; margin-bottom:15px; font-size:16px;">تسجيل الدخول للنظام</h3>
-        
         <div class="input-group">
             <label>البريد الإلكتروني</label>
             <input type="email" id="authEmail" placeholder="example@domain.com">
@@ -57,11 +58,11 @@
         <button type="button" class="btn btn-secondary" style="background:#475569; font-size:11px; margin-top:5px;" onclick="forgotPassword()">نسيت كلمة المرور؟</button>
     </div>
 
-    <!-- نافذة استعادة كلمة المرور المخصصة -->
+    <!-- نافذة استعادة كلمة المرور -->
     <div id="forgotModal" class="modal-overlay hidden">
         <div class="modal-box">
             <h3 style="color:#312e81; font-size:15px; margin-bottom:8px;">استعادة كلمة المرور</h3>
-            <p style="font-size:11px; color:#64748b; margin-bottom:12px; line-height:1.6;">أدخل بريدك الإلكتروني المسجل، وستصلك رسالة إعادة التعيين. <b>ملاحظة:</b> تحقق من قسم Spam إذا لم تجدها.</p>
+            <p style="font-size:11px; color:#64748b; margin-bottom:12px; line-height:1.6;">أدخل بريدك الإلكتروني المسجل، وستصلك رسالة إعادة التعيين.</p>
             <div class="input-group">
                 <label>البريد الإلكتروني</label>
                 <input type="email" id="resetEmail" placeholder="example@domain.com">
@@ -85,7 +86,17 @@
         </div>
     </div>
 
+    <!-- القائمة الرئيسية (سجل العمال) -->
     <div id="homeView" class="hidden">
+        <div class="global-summary" id="globalSummaryBox">جاري حساب إجمالي الرواتب...</div>
+        <div class="input-group" style="margin-bottom:8px;">
+            <label>فترة حساب الإجمالي العام</label>
+            <select id="globalPeriod" onchange="renderWorkers()">
+                <option value="all">الشهر كامل (30 يوم)</option>
+                <option value="p1">النصف الأول (1 إلى 15)</option>
+                <option value="p2">النصف الثاني (16 إلى 30)</option>
+            </select>
+        </div>
         <div class="input-group" style="margin-bottom:8px;">
             <input type="text" id="searchWorkerInput" placeholder="🔍 بحث عن عامل..." oninput="renderWorkers()">
         </div>
@@ -94,6 +105,7 @@
         <button type="button" class="btn btn-secondary" onclick="logoutUser()" style="background:#dc2626; margin-top:10px;">🚪 تسجيل خروج</button>
     </div>
 
+    <!-- شاشة إضافة عامل -->
     <div id="addView" class="hidden">
         <button type="button" class="btn btn-secondary" onclick="showHome()">⬅ رجوع</button>
         <div class="input-group">
@@ -107,6 +119,7 @@
         <button type="button" class="btn btn-primary" onclick="saveWorker()">💾 حفظ العامل</button>
     </div>
 
+    <!-- شاشة ملف العامل الحركات -->
     <div id="profileView" class="hidden">
         <button type="button" class="btn btn-secondary" onclick="showHome()">⬅ رجوع للقائمة</button>
         <div class="profile-header">
@@ -146,7 +159,8 @@
         <div class="input-group">
             <label>الحالة</label>
             <select id="recStatus" onchange="toggleExtra()">
-                <option value="present">دوام (افتراضي)</option>
+                <option value="present">دوام (حاضر)</option>
+                <option value="evening">مساعي (مسائي/جزئي)</option>
                 <option value="absent">غائب</option>
             </select>
         </div>
@@ -184,6 +198,7 @@
         <button type="button" class="btn btn-primary" style="background:#10b981; margin-top:12px;" onclick="copyReport()">📋 نسخ التقرير</button>
     </div>
 
+    <!-- شاشة التقويم -->
     <div id="calView" class="hidden">
         <button type="button" class="btn btn-secondary" onclick="hideCal()">⬅ رجوع</button>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -201,8 +216,13 @@
             <div style="font-size:11px; font-weight:bold; color:#64748b;">سبت</div>
         </div>
         <div id="calGrid" class="calendar-grid"></div>
+        <div style="margin-top:12px; font-size:11px; color:#64748b; text-align:center; display:flex; justify-content:center; gap:10px;">
+            <span>🟢 حاضر</span>
+            <span>🟠 مساعي</span>
+            <span>🔴 غياب</span>
+        </div>
     </div>
-            </div>
+                    </div>
     <script>
     const firebaseConfig = {
       apiKey: "AIzaSyDcQOkPejPSlzOxQixqaQFViLO96QRJo8Q",
@@ -235,8 +255,6 @@
     let calDate = new Date();
     let selectedDateStr = new Date().toISOString().split('T')[0];
     let isRegisterMode = false;
-    let resetCooldownTime = 0;
-    let resetCooldownInterval = null;
     let confirmCallback = null;
     let editingDateState = null;
 
@@ -302,33 +320,22 @@
                 showMsg('تم إنشاء الحساب بنجاح');
             }).catch((error) => {
                 let msg = 'خطأ في إنشاء الحساب';
-                if (error.code === 'auth/email-already-in-use') {
-                    msg = '⚠️ هذا البريد مسجل بالفعل، يرجى تسجيل الدخول أو استخدام بريد آخر.';
-                } else if (error.code === 'auth/weak-password') {
-                    msg = '⚠️ كلمة المرور ضعيفة جداً (يجب أن تكون 6 أحرف على الأقل).';
-                } else if (error.code === 'auth/invalid-email') {
-                    msg = '⚠️ صيغة البريد الإلكتروني غير صحيحة.';
-                }
+                if (error.code === 'auth/email-already-in-use') msg = '⚠️ البريد مسجل مسبقاً.';
+                else if (error.code === 'auth/weak-password') msg = '⚠️ كلمة المرور ضعيفة جداً.';
                 showMsg(msg);
             });
         } else {
             auth.signInWithEmailAndPassword(email, password).then(() => {
                 showMsg('تم تسجيل الدخول بنجاح');
             }).catch((error) => {
-                let msg = 'خطأ في تسجيل الدخول';
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                    msg = '⚠️ البريد الإلكتروني أو كلمة المرور غير صحيحة.';
-                }
-                showMsg(msg);
+                showMsg('⚠️ البريد أو كلمة المرور غير صحيحة.');
             });
         }
     }
 
     function forgotPassword() {
         const emailInput = document.getElementById('authEmail').value.trim();
-        if (emailInput) {
-            document.getElementById('resetEmail').value = emailInput;
-        }
+        if (emailInput) document.getElementById('resetEmail').value = emailInput;
         document.getElementById('forgotModal').classList.remove('hidden');
     }
 
@@ -337,36 +344,14 @@
     }
 
     function submitPasswordReset() {
-        if (resetCooldownTime > 0) {
-            showMsg(`الرجاء الانتظار ${resetCooldownTime} ثانية`);
-            return;
-        }
         const email = document.getElementById('resetEmail').value.trim();
         if (!email) {
             showMsg('الرجاء كتابة البريد الإلكتروني');
             return;
         }
         auth.sendPasswordResetEmail(email).then(() => {
-            showMsg('تم إرسال رابط الاستعادة. تحقق من قسم Spam');
+            showMsg('تم إرسال رابط الاستعادة');
             closeForgotModal();
-            
-            resetCooldownTime = 30;
-            const btn = document.getElementById('resetSendBtn');
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-            
-            if (resetCooldownInterval) clearInterval(resetCooldownInterval);
-            resetCooldownInterval = setInterval(() => {
-                resetCooldownTime--;
-                btn.innerText = `انتظر (${resetCooldownTime}ث)`;
-                if (resetCooldownTime <= 0) {
-                    clearInterval(resetCooldownInterval);
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                    btn.innerText = 'إرسال';
-                }
-            }, 1000);
-
         }).catch((error) => {
             showMsg('خطأ: ' + error.message);
         });
@@ -417,18 +402,15 @@
     function saveWorker() {
         const name = document.getElementById('workerName').value.trim();
         const salary = parseFloat(document.getElementById('workerSalary').value) || 0;
-        
         if (!name || salary <= 0) {
             showMsg('الرجاء إدخال اسم العامل وراتب صحيح');
             return;
         }
-
         const exists = workers.some(w => w.name.trim().toLowerCase() === name.toLowerCase());
         if (exists) {
-            showMsg('⚠️ هذا العامل موجود مسبقاً في القائمة.');
+            showMsg('⚠️ هذا العامل موجود مسبقاً.');
             return;
         }
-
         workers.push({ name: name, salary: salary, records: [], other: '' });
         saveData();
         showHome();
@@ -463,12 +445,61 @@
         showMsg('تم التحديث');
     }
 
+    function calculateWorkerNet(w, period, currentSelectedDate) {
+        const recs = w.records || [];
+        const [targetYear, targetMonth] = currentSelectedDate.split('-');
+        const filteredRecs = recs.filter(r => {
+            const [y, m, dStr] = r.date.split('-');
+            if (y !== targetYear || m !== targetMonth) return false;
+            const d = parseInt(dStr);
+            if (period === 'p1') return d >= 1 && d <= 15;
+            if (period === 'p2') return d >= 16;
+            return true;
+        });
+
+        let absentTot = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
+        filteredRecs.forEach(r => {
+            if (r.status === 'absent') absentTot++;
+            if (r.status !== 'absent') {
+                otTot += (r.ot || 0);
+                ot2Tot += (r.ot2 || 0);
+                delayTot += (r.delay || 0);
+            }
+            withTot += (r.withdrawn || 0);
+        });
+
+        const totalDaysInPeriod = (period === 'all') ? 30 : 15;
+        const days = totalDaysInPeriod - absentTot;
+        const daily = w.salary / 30;
+        const hourly = daily / 9;
+        const earnedDays = days * daily;
+        const earnedOt = otTot * hourly * 1.5;
+        const earnedOt2 = ot2Tot * hourly * 2;
+        const cutDelay = delayTot * hourly;
+        
+        let otherVal = 0;
+        if (w.other && w.other.trim() !== '' && period === 'all') {
+            const match = w.other.match(/-?\d+(\.\d+)?/);
+            otherVal = match ? parseFloat(match[0]) : 0;
+        }
+        return earnedDays + earnedOt + earnedOt2 - cutDelay - withTot + (period === 'all' ? otherVal : 0);
+    }
+
     function renderWorkers() {
         const list = document.getElementById('workersList');
+        const globalSummaryBox = document.getElementById('globalSummaryBox');
         list.innerHTML = '';
-        
         const searchQuery = (document.getElementById('searchWorkerInput').value || '').toLowerCase();
+        const globalPeriod = document.getElementById('globalPeriod').value;
         const filteredWorkers = workers.filter(w => w.name.toLowerCase().includes(searchQuery));
+
+        let totalGlobalNet = 0;
+        workers.forEach(w => {
+            totalGlobalNet += calculateWorkerNet(w, globalPeriod, selectedDateStr);
+        });
+
+        let periodName = globalPeriod === 'p1' ? 'النصف الأول (1-15)' : (globalPeriod === 'p2' ? 'النصف الثاني (16-30)' : 'الشهر كامل');
+        globalSummaryBox.innerHTML = `📊 <b>إجمالي رواتب جميع العمال (${periodName}):</b><br><span style="font-size:16px; color:#38bdf8;">${totalGlobalNet.toFixed(2)} ليرة</span>`;
 
         if (filteredWorkers.length === 0) {
             list.innerHTML = '<div style="text-align:center; color:#64748b; font-size:12px; padding:15px;">لا توجد نتائج مطابقة.</div>';
@@ -477,12 +508,13 @@
         
         workers.forEach((w, i) => {
             if (!filteredWorkers.includes(w)) return;
+            const workerNet = calculateWorkerNet(w, globalPeriod, selectedDateStr);
             const div = document.createElement('div');
             div.className = 'worker-card';
             div.innerHTML = `
                 <div style="flex-grow:1; cursor:pointer;" onclick="openProfile(${i})">
                     <div style="font-weight:bold;">👤 ${w.name}</div>
-                    <div style="font-size:11px; color:#64748b; margin-top:3px;">الراتب: ${w.salary}</div>
+                    <div style="font-size:11px; color:#64748b; margin-top:3px;">الراتب: ${w.salary} | الصافي (${periodName}): <b style="color:#4f46e5;">${workerNet.toFixed(2)}</b></div>
                 </div>
                 <button type="button" class="btn-danger" onclick="deleteWorker(event, ${i})">حذف</button>
             `;
@@ -569,7 +601,7 @@
         const r = w.records[idx];
         editingDateState = r.date;
         document.getElementById('recDate').value = r.date;
-        document.getElementById('recStatus').value = r.status;
+        document.getElementById('recStatus').value = r.status || 'present';
         document.getElementById('recOT').value = r.ot || '';
         document.getElementById('recOT2').value = r.ot2 || '';
         document.getElementById('recDelay').value = r.delay || '';
@@ -608,13 +640,16 @@
         const period = document.getElementById('calcPeriod').value;
         const filteredRecs = getFilteredRecords();
         
-        let absentTot = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
-        let delayDates = [], absentDates = [];
+        let absentTot = 0, eveningTot = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
+        let delayDates = [], absentDates = [], eveningDates = [];
         
         filteredRecs.forEach(r => {
             if (r.status === 'absent') {
                 absentTot++;
                 absentDates.push(getFormattedDateName(r.date));
+            } else if (r.status === 'evening') {
+                eveningTot++;
+                eveningDates.push(getFormattedDateName(r.date));
             } else {
                 if ((r.delay || 0) > 0) {
                     delayTot += r.delay;
@@ -649,8 +684,12 @@
         txt += `👤 اسم العامل: ${w.name}\n`;
         txt += `💰 الراتب الشهري: ${w.salary} ليرة\n`;
         txt += `-------------------\n`;
-        txt += `📅 كم يوم مداوم (${days} يوم): ${earnedDays.toFixed(2)} ليرة\n`;
+        txt += `📅 كم يوم دوام (${days} يوم): ${earnedDays.toFixed(2)} ليرة\n`;
         
+        if (eveningTot > 0) {
+            txt += `🌙 أيام مساعي (مسائي): ${eveningTot} يوم\n`;
+        }
+
         if (otTot > 0 || ot2Tot > 0) {
             txt += `-------------------\n`;
             if (otTot > 0) txt += `➕ إضافي 1.5 (${otTot} ساعة): +${earnedOt.toFixed(2)} ليرة\n`;
@@ -700,15 +739,15 @@
 
         filteredRecs.forEach((r) => {
             const realIdx = w.records.findIndex(item => item.date === r.date);
-            let stTxt = r.status === 'present' ? 'حاضر' : 'غائب';
+            let stTxt = r.status === 'present' ? 'حاضر' : (r.status === 'evening' ? 'مساعي' : 'غائب');
             let details = [];
             
-            if (r.status === 'present') {
+            if (r.status !== 'absent') {
                 if ((r.ot || 0) > 0) details.push(`إضافي 1.5: ${r.ot} س`);
                 if ((r.ot2 || 0) > 0) details.push(`إضافي 2x: ${r.ot2} س`);
                 if ((r.delay || 0) > 0) details.push(`تأخير: ${r.delay} س`);
                 if ((r.withdrawn || 0) > 0) details.push(`ساحب: ${r.withdrawn}`);
-                if (details.length === 0) details.push(`يوم دوام عادي`);
+                if (details.length === 0) details.push(r.status === 'evening' ? `دوام مسائي` : `يوم دوام عادي`);
             } else { 
                 details.push(`غياب`); 
             }
@@ -781,6 +820,8 @@
             const status = recsMap[dKey] || 'present';
             if (status === 'absent') {
                 dayDiv.classList.add('absent');
+            } else if (status === 'evening') {
+                dayDiv.classList.add('evening');
             }
 
             dayDiv.onclick = function() {
