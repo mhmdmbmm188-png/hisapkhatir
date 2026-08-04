@@ -26,7 +26,6 @@
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-top: 10px; }
         .cal-day { padding: 8px 0; background: #22c55e; color: #fff; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .cal-day.absent { background: #dc2626; color: #fff; }
-        .cal-day.evening { background: #f59e0b; color: #fff; }
         .profile-header { background: #e0e7ff; padding: 12px; border-radius: 8px; margin-bottom: 12px; position: relative; }
         .edit-btn { position: absolute; top: 10px; left: 10px; background: none; border: none; font-size: 16px; cursor: pointer; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; }
@@ -160,7 +159,6 @@
             <label>الحالة</label>
             <select id="recStatus" onchange="toggleExtra()">
                 <option value="present">دوام (حاضر)</option>
-                <option value="evening">مساعي (مسائي/جزئي)</option>
                 <option value="absent">غائب</option>
             </select>
         </div>
@@ -216,14 +214,13 @@
             <div style="font-size:11px; font-weight:bold; color:#64748b;">سبت</div>
         </div>
         <div id="calGrid" class="calendar-grid"></div>
-        <div style="margin-top:12px; font-size:11px; color:#64748b; text-align:center; display:flex; justify-content:center; gap:10px;">
+        <div style="margin-top:12px; font-size:11px; color:#64748b; text-align:center; display:flex; justify-content:center; gap:15px;">
             <span>🟢 حاضر</span>
-            <span>🟠 مساعي</span>
             <span>🔴 غياب</span>
         </div>
     </div>
-                    </div>
-    <script>
+</div>
+<script>
     const firebaseConfig = {
       apiKey: "AIzaSyDcQOkPejPSlzOxQixqaQFViLO96QRJo8Q",
       authDomain: "hisapkhatir.firebaseapp.com",
@@ -234,6 +231,12 @@
       appId: "1:493775178117:web:4a2daf8c7f75011f55dcec"
     };
     firebase.initializeApp(firebaseConfig);
+    
+    // تفعيل التخزين المحلي للاستخدام بدون إنترنت والمزامنة التلقائية عند الاتصال
+    try {
+        firebase.database().setPersistenceEnabled(true);
+    } catch(e) {}
+
     const db = firebase.database();
     const auth = firebase.auth();
 
@@ -244,9 +247,9 @@
             statusEl.style.color = '#16a34a';
             statusEl.style.background = '#dcfce7';
         } else {
-            statusEl.innerHTML = '🔴 غير متصل بالسحابة';
-            statusEl.style.color = '#dc2626';
-            statusEl.style.background = '#fee2e2';
+            statusEl.innerHTML = '🔴 يعمل دون إنترنت (سيتم المزامنة تلقائياً)';
+            statusEl.style.color = '#d97706';
+            statusEl.style.background = '#fef3c7';
         }
     });
 
@@ -257,6 +260,26 @@
     let isRegisterMode = false;
     let confirmCallback = null;
     let editingDateState = null;
+    let lastBackPress = 0;
+
+    // إدارة زر الرجوع في الهاتف للعودة للرئيسية والخروج بضغطة مزدوجة
+    window.history.pushState({page: 'home'}, '', '');
+    window.addEventListener('popstate', function(e) {
+        const homeView = document.getElementById('homeView');
+        if (homeView.classList.contains('hidden')) {
+            showHome();
+            window.history.pushState({page: 'home'}, '', '');
+        } else {
+            const now = new Date().getTime();
+            if (now - lastBackPress < 2000) {
+                window.close();
+            } else {
+                lastBackPress = now;
+                showMsg('اضغط مرة أخرى للخروج من التطبيق');
+                window.history.pushState({page: 'home'}, '', '');
+            }
+        }
+    });
 
     function showMsg(msg) {
         let m = document.getElementById('toastMsg');
@@ -365,13 +388,10 @@
     }
 
     function loadUserData(uid) {
-        db.ref('users/' + uid + '/workers').once('value').then((snapshot) => {
+        db.ref('users/' + uid + '/workers').on('value', (snapshot) => {
             const data = snapshot.val();
             workers = (data && Array.isArray(data)) ? data : [];
             document.getElementById('recDate').value = selectedDateStr;
-            renderWorkers();
-        }).catch(() => {
-            workers = [];
             renderWorkers();
         });
     }
@@ -397,6 +417,7 @@
         document.getElementById('workerSalary').value = '';
         document.getElementById('homeView').classList.add('hidden');
         document.getElementById('addView').classList.remove('hidden');
+        window.history.pushState({page: 'sub'}, '', '');
     }
 
     function saveWorker() {
@@ -445,7 +466,7 @@
         showMsg('تم التحديث');
     }
 
-    function calculateWorkerNet(w, period, currentSelectedDate) {
+    function getWorkerStats(w, period, currentSelectedDate) {
         const recs = w.records || [];
         const [targetYear, targetMonth] = currentSelectedDate.split('-');
         const filteredRecs = recs.filter(r => {
@@ -482,7 +503,8 @@
             const match = w.other.match(/-?\d+(\.\d+)?/);
             otherVal = match ? parseFloat(match[0]) : 0;
         }
-        return earnedDays + earnedOt + earnedOt2 - cutDelay - withTot + (period === 'all' ? otherVal : 0);
+        const net = earnedDays + earnedOt + earnedOt2 - cutDelay - withTot + (period === 'all' ? otherVal : 0);
+        return { net, days, absentTot, delayTot };
     }
 
     function renderWorkers() {
@@ -495,7 +517,8 @@
 
         let totalGlobalNet = 0;
         workers.forEach(w => {
-            totalGlobalNet += calculateWorkerNet(w, globalPeriod, selectedDateStr);
+            const stats = getWorkerStats(w, globalPeriod, selectedDateStr);
+            totalGlobalNet += stats.net;
         });
 
         let periodName = globalPeriod === 'p1' ? 'النصف الأول (1-15)' : (globalPeriod === 'p2' ? 'النصف الثاني (16-30)' : 'الشهر كامل');
@@ -508,13 +531,16 @@
         
         workers.forEach((w, i) => {
             if (!filteredWorkers.includes(w)) return;
-            const workerNet = calculateWorkerNet(w, globalPeriod, selectedDateStr);
+            const stats = getWorkerStats(w, globalPeriod, selectedDateStr);
             const div = document.createElement('div');
             div.className = 'worker-card';
             div.innerHTML = `
                 <div style="flex-grow:1; cursor:pointer;" onclick="openProfile(${i})">
                     <div style="font-weight:bold;">👤 ${w.name}</div>
-                    <div style="font-size:11px; color:#64748b; margin-top:3px;">الراتب: ${w.salary} | الصافي (${periodName}): <b style="color:#4f46e5;">${workerNet.toFixed(2)}</b></div>
+                    <div style="font-size:11px; color:#475569; margin-top:4px; line-height:1.5;">
+                        الراتب: ${w.salary} | الدوام: ${stats.days} | غياب: ${stats.absentTot} | تأخير: ${stats.delayTot} س<br>
+                        الصافي (${periodName}): <b style="color:#4f46e5;">${stats.net.toFixed(2)} ليرة</b>
+                    </div>
                 </div>
                 <button type="button" class="btn-danger" onclick="deleteWorker(event, ${i})">حذف</button>
             `;
@@ -551,6 +577,7 @@
         toggleExtra();
         document.getElementById('homeView').classList.add('hidden');
         document.getElementById('profileView').classList.remove('hidden');
+        window.history.pushState({page: 'sub'}, '', '');
         renderRecords();
     }
 
@@ -593,7 +620,7 @@
         editingDateState = null;
         saveData();
         renderRecords();
-        showMsg('تم الحفظ');
+        showMsg('تم الحفظ ومزامנתه محلياً/سحابياً');
     }
 
     function editRecord(idx) {
@@ -640,16 +667,13 @@
         const period = document.getElementById('calcPeriod').value;
         const filteredRecs = getFilteredRecords();
         
-        let absentTot = 0, eveningTot = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
-        let delayDates = [], absentDates = [], eveningDates = [];
+        let absentTot = 0, otTot = 0, ot2Tot = 0, delayTot = 0, withTot = 0;
+        let delayDates = [], absentDates = [];
         
         filteredRecs.forEach(r => {
             if (r.status === 'absent') {
                 absentTot++;
                 absentDates.push(getFormattedDateName(r.date));
-            } else if (r.status === 'evening') {
-                eveningTot++;
-                eveningDates.push(getFormattedDateName(r.date));
             } else {
                 if ((r.delay || 0) > 0) {
                     delayTot += r.delay;
@@ -686,10 +710,6 @@
         txt += `-------------------\n`;
         txt += `📅 كم يوم دوام (${days} يوم): ${earnedDays.toFixed(2)} ليرة\n`;
         
-        if (eveningTot > 0) {
-            txt += `🌙 أيام مساعي (مسائي): ${eveningTot} يوم\n`;
-        }
-
         if (otTot > 0 || ot2Tot > 0) {
             txt += `-------------------\n`;
             if (otTot > 0) txt += `➕ إضافي 1.5 (${otTot} ساعة): +${earnedOt.toFixed(2)} ليرة\n`;
@@ -739,7 +759,7 @@
 
         filteredRecs.forEach((r) => {
             const realIdx = w.records.findIndex(item => item.date === r.date);
-            let stTxt = r.status === 'present' ? 'حاضر' : (r.status === 'evening' ? 'مساعي' : 'غائب');
+            let stTxt = r.status === 'present' ? 'حاضر' : 'غائب';
             let details = [];
             
             if (r.status !== 'absent') {
@@ -747,7 +767,7 @@
                 if ((r.ot2 || 0) > 0) details.push(`إضافي 2x: ${r.ot2} س`);
                 if ((r.delay || 0) > 0) details.push(`تأخير: ${r.delay} س`);
                 if ((r.withdrawn || 0) > 0) details.push(`ساحب: ${r.withdrawn}`);
-                if (details.length === 0) details.push(r.status === 'evening' ? `دوام مسائي` : `يوم دوام عادي`);
+                if (details.length === 0) details.push(`يوم دوام عادي`);
             } else { 
                 details.push(`غياب`); 
             }
@@ -820,8 +840,6 @@
             const status = recsMap[dKey] || 'present';
             if (status === 'absent') {
                 dayDiv.classList.add('absent');
-            } else if (status === 'evening') {
-                dayDiv.classList.add('evening');
             }
 
             dayDiv.onclick = function() {
